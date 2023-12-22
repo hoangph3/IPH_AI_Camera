@@ -1,0 +1,18 @@
+version: "3"
+
+networks:
+  mct-net:
+    name: mct-net
+    external: true
+
+services:
+  mct-camera:
+    image: kotoracompany/mct-camera:0.1.0
+    container_name: mct_camera
+    volumes: 
+      - ./env/prod.json:/app/env/config.json
+    networks:
+      - mct-net
+    ports:
+      - 9081:9081
+    restart: always

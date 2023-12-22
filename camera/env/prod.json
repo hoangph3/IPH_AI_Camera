@@ -1,0 +1,16 @@
+{
+  "camera": [
+    "/home/hoang/Downloads/mctrack/IPH_9cam_4min/18.mov",
+    "string",
+    "/home/hoang/Downloads/mctrack/IPH_9cam_4min/16.mov"
+  ],
+  "app": {
+    "port": 9081
+  },
+  "redis": {
+    "uri": "redis://localhost:6379/0",
+    "max_size": 75,
+    "batch_size": 2,
+    "time_retry": 10
+  }
+}

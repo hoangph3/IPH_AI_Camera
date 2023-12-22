@@ -1,0 +1,27 @@
+{
+    "backend": {
+        "redis": {
+            "uri": "redis://localhost:6379/0"
+        },
+        "mongo": {
+            "tracking": {
+                "uri": "mongodb://admin:password@localhost:27017/admin",
+                "database": "iph",
+                "collection": "tracking"
+            }
+        }
+    },
+    "model": {
+        "detect": {
+            "checkpoint": "./checkpoint/yolov5mu.pt",
+            "conf": 0.7,
+            "overlap": 0.3,
+            "classes": [0]
+        },
+        "reid": {
+            "checkpoint": "./checkpoint/osnet_x1_0_market.pth",
+            "input_size": [128, 256],
+            "fp16": false
+        }
+    }
+}

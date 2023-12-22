@@ -1,0 +1,36 @@
+{
+    "backend": {
+        "mongo": {
+            "tracking": {
+                "uri": "mongodb://admin:fireinthehole@localhost:27017/admin",
+                "database": "iph",
+                "collection": "tracking"
+            },
+            "reid": {
+                "uri": "mongodb://admin:fireinthehole@localhost:27017/admin",
+                "database": "iph",
+                "collection": "reid"
+            }
+        },
+        "chroma": {
+            "host": "localhost",
+            "port": 8000,
+            "collection": "reid"
+        }
+    },
+    "clustering": {
+        "threshold": 0.1,
+        "linkage": "average"
+    },
+    "matching": {
+        "threshold": 0.1
+    },
+    "voting": {
+        "policy": "count"
+    },
+    "metric": "cosine",
+    "interval": 5,
+    "batch_time": 600,
+    "top_k": 20,
+    "max_
+}

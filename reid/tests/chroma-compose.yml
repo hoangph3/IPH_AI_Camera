@@ -1,0 +1,25 @@
+version: '3'
+
+networks:
+  mct-net:
+    name: mct-net
+    external: true
+
+services:
+  mct-chroma:
+    container_name: mct_chroma
+    image: ghcr.io/chroma-core/chroma:latest
+    restart: always
+    command: uvicorn chromadb.app:app --reload --workers 4 --host 0.0.0.0 --port 8000 --log-config chromadb/log_config.yml
+    environment:
+      - IS_PERSISTENT=TRUE
+      - CHROMA_SERVER_AUTH_PROVIDER=${CHROMA_SERVER_AUTH_PROVIDER}
+      - CHROMA_SERVER_AUTH_CREDENTIALS_FILE=${CHROMA_SERVER_AUTH_CREDENTIALS_FILE}
+      - CHROMA_SERVER_AUTH_CREDENTIALS=${CHROMA_SERVER_AUTH_CREDENTIALS}
+      - CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=${CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER}
+      - PERSIST_DIRECTORY=${PERSIST_DIRECTORY:-/chroma/chroma}
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - '8000:8000'
+    networks:
+      - mct-net

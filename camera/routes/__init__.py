@@ -1,0 +1,1 @@
+from .camera import camera as camera_route
