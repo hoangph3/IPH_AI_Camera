@@ -1,0 +1,19 @@
+version: "3"
+
+networks:
+  mct-net:
+    name: mct-net
+    external: true
+
+services:
+  mct-reid:
+    image: kotoracompany/mct-reid:0.1.0
+    container_name: mct_camera
+    volumes: 
+      - ./env/camera.json:/app/env/camera.json
+      - ./env/prod.json:/app/env/config.json
+
+    networks:
+      - mct-net
+    ports:
+    restart: always

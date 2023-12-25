@@ -1,0 +1,6 @@
+sklearn
+more_itertools
+scipy
+loguru
+chromadb
+pymongo
