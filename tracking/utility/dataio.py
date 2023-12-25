@@ -28,7 +28,7 @@ def convert_img_to_numpy_array(img_path, resize=False, image_width=None):
 
 
 def convert_numpy_array_to_bytes(array: np.array) -> str:
-    array = cv2.cvtColor(array, cv2.COLOR_BGR2RGB)
+    array = convert_bgr2rgb(array)
     # TODO: convert numpy array to bytes
     compressed_file = io.BytesIO()
     Image.fromarray(array).save(compressed_file, format="JPEG")
@@ -63,3 +63,13 @@ def convert_bytes_to_numpy_array(j_dumps: str, resize=False, image_width=None) -
             img = img.resize((int(new_width), int(new_height)))
 
     return np.array(img)
+
+
+def convert_bgr2rgb(array):
+    array = cv2.cvtColor(array, cv2.COLOR_BGR2RGB)
+    return array
+
+
+def convert_rgb2bgr(array):
+    array = cv2.cvtColor(array, cv2.COLOR_RGB2BGR)
+    return array

@@ -71,3 +71,10 @@ class Database:
             return {}
 
         return records[0]
+
+    def write_reid_data(self, data):
+        self.mongo_reid.create(
+            db_name=self.config.backend.mongo.reid.database,
+            collection_name=self.config.backend.mongo.reid.collection,
+            data=data
+        )

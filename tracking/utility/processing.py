@@ -1,6 +1,7 @@
 import cv2
 from typing import Tuple
 import numpy as np
+import torch
 
 
 def resize_with_pad(image: np.array, 
@@ -30,6 +31,14 @@ def resize_with_pad(image: np.array,
 
     image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT,None,value=padding_color)
     return image
+
+
+def reshape_img(x):
+    x = torch.from_numpy(x.astype(np.float32))
+    x = torch.unsqueeze(x, 0)
+    x = torch.permute(x, (0, 3, 1, 2))  # N x C x H x W
+    x = torch.squeeze(x)
+    return x
 
 
 def img_norm(x):
