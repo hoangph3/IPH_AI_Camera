@@ -74,6 +74,8 @@ class Matching:
             cam_ids = np.array([doc['camera_id'] for doc in tracking_dt])
             timestamps = np.array([doc['timestamp'] for doc in tracking_dt])
 
+            reid_events = []
+
             # TODO: Clustering
             clustering_params = {
                 'n_clusters': None,
@@ -166,19 +168,44 @@ class Matching:
 
                 # TODO: Check neighbors is exists or not
                 if not len(q_candidates):
-                    # If 1 id in n camera -> n ids.
-                    for cid in set(cam_id):
-                        gid = handler.get_id(short=True)
-                        self.chroma_client.insert(
-                            collection=self.config.backend.chroma.collection,
-                            embeddings=query,
-                            ids=[handler.get_id() for _ in range(len(query))],
-                            metadatas=[{"global_id": gid, "camera_id": cid} for _ in range(len(query))]
-                        )
+                    # Generate new global_id
+                    gid = handler.get_id(short=True)
+                    ids = []
+                    metadatas = []
+
+                    # Create reid event
+                    for idx in range(len(query)):
+                        cid = cam_id[idx]
+                        query_time = timestamp[idx]
+                        ids.append(handler.get_id())
+                        metadatas.append({"global_id": gid, "camera_id": cid})
+                        reid_event = {
+                            "query_cam": cid,
+                            "query_time": query_time,
+                            "global_id": gid,
+                            "cam_id": cid,
+                            "dist": -1,
+                            "rerank_dist": -1
+                        }
+                        reid_events.append(reid_event)
+
+                    # Insert new global_id
+                    self.chroma_client.insert(
+                        collection=self.config.backend.chroma.collection,
+                        embeddings=query,
+                        ids=ids,
+                        metadatas=metadatas
+                    )
                 else:
                     q_df = pd.DataFrame(q_candidates)
                     # Sort by dist & rerank_dist
                     q_df = q_df.sort_values(by=['rerank_dist', 'dist'])
+                    # Get top 1
+                    reid_event = q_df.iloc[0].to_dict()
+                    reid_events.append(reid_event)
+
+            # Write reid logs
+            self.database.write_reid_data(data=reid_events)
 
             # Wait to flush
             time.sleep(self.config.interval)
