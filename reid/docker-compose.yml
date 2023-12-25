@@ -15,3 +15,45 @@ services:
     networks:
       - mct-net
     restart: always
+
+  mct-chroma:
+    container_name: mct_chroma
+    image: ghcr.io/chroma-core/chroma:latest
+    restart: always
+    command: uvicorn chromadb.app:app --reload --workers 4 --host 0.0.0.0 --port 8000 --log-config chromadb/log_config.yml
+    environment:
+      - IS_PERSISTENT=TRUE
+      - CHROMA_SERVER_AUTH_PROVIDER=${CHROMA_SERVER_AUTH_PROVIDER}
+      - CHROMA_SERVER_AUTH_CREDENTIALS_FILE=${CHROMA_SERVER_AUTH_CREDENTIALS_FILE}
+      - CHROMA_SERVER_AUTH_CREDENTIALS=${CHROMA_SERVER_AUTH_CREDENTIALS}
+      - CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=${CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER}
+      - PERSIST_DIRECTORY=${PERSIST_DIRECTORY:-/chroma/chroma}
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - '8000:8000'
+    networks:
+      - mct-net
+      
+  mct-mongodb:
+    image: mongo:6.0.1
+    container_name: mct_mongodb
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    networks:
+      - mct-net
+
+  mct-mongo-express:
+    image: mongo-express:1.0.0-alpha
+    container_name: mct_mongo_express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_SERVER=mct-mongodb
+    networks:
+      - mct-net

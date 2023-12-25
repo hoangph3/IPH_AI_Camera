@@ -4,3 +4,5 @@ scipy
 loguru
 chromadb
 pymongo
+pandas
+shortuuid
