@@ -8,12 +8,10 @@ networks:
 services:
   mct-reid:
     image: kotoracompany/mct-reid:0.1.0
-    container_name: mct_camera
+    container_name: mct_reid
     volumes: 
       - ./env/camera.json:/app/env/camera.json
-      - ./env/prod.json:/app/env/config.json
-
+      - ./env/prod.json:/app/env/prod.json
     networks:
       - mct-net
-    ports:
     restart: always

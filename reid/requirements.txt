@@ -1,4 +1,4 @@
-sklearn
+scikit-learn
 more_itertools
 scipy
 loguru
