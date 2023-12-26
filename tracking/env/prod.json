@@ -7,13 +7,13 @@
             "tracking": {
                 "uri": "mongodb://admin:password@192.168.0.149:27017/admin",
                 "database": "iph",
-                "collection": "tracking"
+                "collection": "tracking_test"
             }
         }
     },
     "model": {
         "detect": {
-            "checkpoint": "./checkpoint/yolov5nu.pt",
+            "checkpoint": "./checkpoint/yolov5nu.engine",
             "conf": 0.7,
             "overlap": 0.3,
             "classes": [
