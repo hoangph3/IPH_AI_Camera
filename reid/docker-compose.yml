@@ -20,6 +20,8 @@ services:
     container_name: mct_chroma
     image: ghcr.io/chroma-core/chroma:latest
     restart: always
+    volumes:
+      - ./volumes/chromadb:/chroma/chroma
     command: uvicorn chromadb.app:app --reload --workers 4 --host 0.0.0.0 --port 8000 --log-config chromadb/log_config.yml
     environment:
       - IS_PERSISTENT=TRUE
@@ -28,12 +30,11 @@ services:
       - CHROMA_SERVER_AUTH_CREDENTIALS=${CHROMA_SERVER_AUTH_CREDENTIALS}
       - CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=${CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER}
       - PERSIST_DIRECTORY=${PERSIST_DIRECTORY:-/chroma/chroma}
-      - TZ=Asia/Ho_Chi_Minh
     ports:
       - '8000:8000'
     networks:
       - mct-net
-      
+
   mct-mongodb:
     image: mongo:6.0.1
     container_name: mct_mongodb
@@ -44,6 +45,8 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=password
     networks:
       - mct-net
+    volumes:
+      - ./volumes/mongodb:/data/db
 
   mct-mongo-express:
     image: mongo-express:1.0.0-alpha
