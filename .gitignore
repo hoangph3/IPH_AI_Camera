@@ -8,6 +8,10 @@ __pycache__/
 .idea
 *.pth
 *.pt
+*.engine
+temp/
+*.whl
+volumes/
 
 # Distribution / packaging
 .Python
