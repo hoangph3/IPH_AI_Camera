@@ -2,12 +2,12 @@
     "backend": {
         "mongo": {
             "tracking": {
-                "uri": "mongodb://admin:fireinthehole@localhost:27017/admin",
+                "uri": "mongodb://admin:password@mct-mongodb:27017/admin",
                 "database": "iph",
                 "collection": "tracking"
             },
             "reid": {
-                "uri": "mongodb://admin:fireinthehole@localhost:27017/admin",
+                "uri": "mongodb://admin:password@mct-mongodb:27017/admin",
                 "database": "iph",
                 "collection": "reid"
             }
@@ -19,19 +19,19 @@
         }
     },
     "clustering": {
-        "threshold": 0.2,
+        "threshold": 0.6,
         "linkage": "average",
-        "n_neighbors": 50
+        "n_neighbors": 5
     },
     "matching": {
-        "threshold": 0.2,
+        "threshold": 0.6,
         "top_k": 20
     },
     "rerank": {
         "k1": 20,
         "k2": 6,
         "lambda_value": 0.3,
-        "threshold": 0.2
+        "threshold": 0.6
     },
     "metric": "euclidean",
     "interval": 5,

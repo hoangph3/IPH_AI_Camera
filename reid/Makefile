@@ -24,7 +24,7 @@ test:
 start:
 	docker-compose up -d
 
-install: build_base build start
+install: build start
 
 stop:
 	docker-compose down

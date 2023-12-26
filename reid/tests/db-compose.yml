@@ -6,24 +6,24 @@ networks:
     external: true
 
 services:
-  mct-chroma:
-    container_name: mct_chroma
-    image: ghcr.io/chroma-core/chroma:latest
-    restart: always
-    volumes:
-      - ./volumes/chromadb:/chroma/chroma
-    command: uvicorn chromadb.app:app --reload --workers 4 --host 0.0.0.0 --port 8000 --log-config chromadb/log_config.yml
-    environment:
-      - IS_PERSISTENT=TRUE
-      - CHROMA_SERVER_AUTH_PROVIDER=${CHROMA_SERVER_AUTH_PROVIDER}
-      - CHROMA_SERVER_AUTH_CREDENTIALS_FILE=${CHROMA_SERVER_AUTH_CREDENTIALS_FILE}
-      - CHROMA_SERVER_AUTH_CREDENTIALS=${CHROMA_SERVER_AUTH_CREDENTIALS}
-      - CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=${CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER}
-      - PERSIST_DIRECTORY=${PERSIST_DIRECTORY:-/chroma/chroma}
-    ports:
-      - '8000:8000'
-    networks:
-      - mct-net
+  # mct-chroma:
+  #   container_name: mct_chroma
+  #   image: ghcr.io/chroma-core/chroma:latest
+  #   restart: always
+  #   volumes:
+  #     - ./volumes/chromadb:/chroma/chroma
+  #   command: uvicorn chromadb.app:app --reload --workers 4 --host 0.0.0.0 --port 8000 --log-config chromadb/log_config.yml
+  #   environment:
+  #     - IS_PERSISTENT=TRUE
+  #     - CHROMA_SERVER_AUTH_PROVIDER=${CHROMA_SERVER_AUTH_PROVIDER}
+  #     - CHROMA_SERVER_AUTH_CREDENTIALS_FILE=${CHROMA_SERVER_AUTH_CREDENTIALS_FILE}
+  #     - CHROMA_SERVER_AUTH_CREDENTIALS=${CHROMA_SERVER_AUTH_CREDENTIALS}
+  #     - CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=${CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER}
+  #     - PERSIST_DIRECTORY=${PERSIST_DIRECTORY:-/chroma/chroma}
+  #   ports:
+  #     - '8000:8000'
+  #   networks:
+  #     - mct-net
 
   mct-mongodb:
     image: mongo:6.0.1
@@ -43,7 +43,7 @@ services:
     container_name: mct_mongo_express
     restart: always
     ports:
-      - 8081:8081
+      - 18081:8081
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
       - ME_CONFIG_MONGODB_ADMINPASSWORD=password

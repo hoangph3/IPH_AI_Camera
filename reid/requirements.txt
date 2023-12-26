@@ -1,8 +1,7 @@
 scikit-learn
-more_itertools
 scipy
 loguru
-chromadb
+chromadb==0.4.10
 pymongo
 pandas
 shortuuid

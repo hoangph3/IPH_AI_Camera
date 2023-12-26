@@ -1,7 +1,8 @@
 FROM python:3.8-slim
 
 RUN apt-get update -y && \
-    apt-get install -y telnet curl nano vim
+    apt-get install -y telnet curl nano vim cmake && \
+    apt-get install --reinstall build-essential -y
 
 COPY ./requirements.txt /tmp/requirements.txt
 

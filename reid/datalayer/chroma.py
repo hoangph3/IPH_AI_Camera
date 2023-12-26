@@ -1,5 +1,6 @@
 import chromadb
 from chromadb.config import Settings
+import numpy as np
 
 
 class ChromaBackend:
@@ -9,11 +10,13 @@ class ChromaBackend:
         self.client = chromadb.HttpClient(
             host=host, port=port, settings=Settings(anonymized_telemetry=False)
         )
+        if metric == 'euclidean':
+            metric = 'l2'
         self.index_params = {'hnsw:space': metric}
 
     def create(self, collection):
         self.client.get_or_create_collection(
-            name=collection, metadata=self.index_params
+            collection, metadata=self.index_params
         )
 
     def drop(self, collection):
@@ -29,10 +32,16 @@ class ChromaBackend:
         return results
 
     def insert(self, collection, embeddings, ids, metadatas):
+        if isinstance(embeddings, np.ndarray):
+            embeddings = embeddings.tolist()
+
         col = self.client.get_or_create_collection(collection, self.index_params)
         col.add(embeddings=embeddings, ids=ids, metadatas=metadatas)
 
     def search(self, collection, embeddings, topk, include=None):
+        if isinstance(embeddings, np.ndarray):
+            embeddings = embeddings.tolist()
+
         if include is None:
             include = ['distances', 'embeddings', 'metadatas']
         col = self.client.get_or_create_collection(collection, self.index_params)
@@ -40,5 +49,8 @@ class ChromaBackend:
         return results
 
     def delete(self, collection, ids):
+        if isinstance(ids, np.ndarray):
+            ids = ids.tolist()
+
         col = self.client.get_or_create_collection(collection, self.index_params)
         col.delete(ids=ids)

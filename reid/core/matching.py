@@ -1,7 +1,6 @@
 from sklearn.cluster import AgglomerativeClustering, DBSCAN
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cdist
-from more_itertools import collapse
 from loguru import logger
 import numpy as np
 import pandas as pd
@@ -49,26 +48,20 @@ class Matching:
         logger.info("Matching start.")
 
         while True:
-            # Get last tracking data
-            last_tracking_dt = self.database.get_last_tracking_data()
-            last_tracking_time = last_tracking_dt.get(self.database.time_field)
-            if last_tracking_time is None:
+            # Get last reid data
+            last_reid_dt = self.database.get_last_reid_data()
+            last_reid_time = last_reid_dt.get(self.database.time_field)
+            if isinstance(last_reid_time, (float, int)) and (
+                handler.get_time() - last_reid_time < self.config.batch_time
+            ):
                 time.sleep(self.config.interval)
                 continue
 
             # Get history tracking data
             tracking_dt = self.database.get_history_tracking_data(
-                time_from=last_tracking_time, time_to=handler.get_time()
+                time_from=last_reid_time, time_to=handler.get_time()
             )
-
-            # Continue to collect more data
-            if (
-                handler.get_time() - last_tracking_time < self.config.batch_time
-            ) and (
-                len(tracking_dt) < self.config.batch_size
-            ):
-                time.sleep(self.config.interval)
-                continue
+            logger.info("Tracking events: {}".format(len(tracking_dt)))
 
             features = np.array([doc['feature_embeddings'] for doc in tracking_dt])
             cam_ids = np.array([doc['camera_id'] for doc in tracking_dt])
@@ -99,7 +92,7 @@ class Matching:
 
                 # Get nearest neighbors of centroid
                 nbrs = NearestNeighbors(
-                    n_neighbors=self.config.clustering.n_neighbors,
+                    n_neighbors=min(self.config.clustering.n_neighbors, len(query)),
                     metric=self.config.metric
                 ).fit(query)
                 nearest_indices = nbrs.kneighbors([centroid], return_distance=False)
@@ -120,51 +113,53 @@ class Matching:
                 )  # to be flattened to: (n_query x valid_k, )
                 gallery = q_nbrs_embeds
 
-                ## Re-ranking
-                q_g_dist = cdist(query, gallery, self.config.metric)  # (n_query, n_query x valid_k, )
-                q_q_dist = cdist(query, query, self.config.metric)
-                g_g_dist = cdist(gallery, gallery, self.config.metric)
-                rerank_dist = re_ranking(
-                    q_g_dist=q_g_dist, q_q_dist=q_q_dist, g_g_dist=g_g_dist,
-                    k1=self.config.rerank.k1, k2=self.config.rerank.k2,
-                    lambda_value=self.config.rerank.lambda_value
-                )  # (n_query, n_query x valid_k, )
-
                 # Build candidates
                 q_candidates = []
-                for idx in range(len(query)):
-                    # Get query info
-                    query_cam = cam_id[idx]
-                    query_time = timestamp[idx]
-                    neighbor_cam = camera_graph.get(query_cam)
 
-                    # Get matching indices
-                    match_dist = q_g_dist[idx]
-                    match_indices = np.where(match_dist <= self.config.matching.threshold)[0].tolist()
-                    
-                    # Get ranking indices
-                    rank_dist = rerank_dist[idx]
-                    rank_indices = np.where(rank_dist <= self.config.rerank.threshold)[0].tolist()
+                ## Re-ranking
+                if len(query) and len(gallery):
+                    q_g_dist = cdist(query, gallery, self.config.metric)  # (n_query, n_query x valid_k, )
+                    q_q_dist = cdist(query, query, self.config.metric)
+                    g_g_dist = cdist(gallery, gallery, self.config.metric)
+                    rerank_dist = re_ranking(
+                        q_g_dist=q_g_dist, q_q_dist=q_q_dist, g_g_dist=g_g_dist,
+                        k1=self.config.rerank.k1, k2=self.config.rerank.k2,
+                        lambda_value=self.config.rerank.lambda_value
+                    )  # (n_query, n_query x valid_k, )
 
-                    # Get intersection indices
-                    candidate_indices = set(match_indices).intersection(set(rank_indices))
+                    for idx in range(len(query)):
+                        # Get query info
+                        query_cam = cam_id[idx]
+                        query_time = timestamp[idx]
+                        neighbor_cam = camera_graph.get(query_cam)
 
-                    # Get candidates
-                    for cidx in candidate_indices:
-                        q_meta = q_nbrs_metas[cidx]
-                        # continue if out scope of query camera
-                        if neighbor_cam and (query_cam not in neighbor_cam):
-                            continue
+                        # Get matching indices
+                        match_dist = q_g_dist[idx]
+                        match_indices = np.where(match_dist <= self.config.matching.threshold)[0].tolist()
+                        
+                        # Get ranking indices
+                        rank_dist = rerank_dist[idx]
+                        rank_indices = np.where(rank_dist <= self.config.rerank.threshold)[0].tolist()
 
-                        candidate = {
-                            "query_cam": query_cam,
-                            "query_time": query_time,
-                            "global_id": q_meta["global_id"],
-                            "cam_id": q_meta["camera_id"],
-                            "dist": match_dist[cidx],
-                            "rerank_dist": rank_dist[cidx]
-                        }
-                        q_candidates.append(candidate)
+                        # Get intersection indices
+                        candidate_indices = set(match_indices).intersection(set(rank_indices))
+
+                        # Get candidates
+                        for cidx in candidate_indices:
+                            q_meta = q_nbrs_metas[cidx]
+                            # continue if out scope of query camera
+                            if neighbor_cam and (query_cam not in neighbor_cam):
+                                continue
+
+                            candidate = {
+                                "query_cam": query_cam,
+                                "query_time": int(query_time),
+                                "global_id": q_meta["global_id"],
+                                "cam_id": q_meta["camera_id"],
+                                "dist": float(match_dist[cidx]),
+                                "rerank_dist": float(rank_dist[cidx])
+                            }
+                            q_candidates.append(candidate)
 
                 # TODO: Check neighbors is exists or not
                 if not len(q_candidates):
@@ -181,7 +176,7 @@ class Matching:
                         metadatas.append({"global_id": gid, "camera_id": cid})
                         reid_event = {
                             "query_cam": cid,
-                            "query_time": query_time,
+                            "query_time": int(query_time),
                             "global_id": gid,
                             "cam_id": cid,
                             "dist": -1,
@@ -205,6 +200,7 @@ class Matching:
                     reid_events.append(reid_event)
 
             # Write reid logs
+            logger.info("Reid: {} events".format(len(reid_events)))
             self.database.write_reid_data(data=reid_events)
 
             # Wait to flush
