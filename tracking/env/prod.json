@@ -13,13 +13,13 @@
     },
     "model": {
         "detect": {
-            "checkpoint": "./checkpoint/yolov5mu.pt",
+            "checkpoint": "./checkpoint/yolov5nu.pt",
             "conf": 0.7,
             "overlap": 0.3,
             "classes": [0]
         },
         "reid": {
-            "checkpoint": "./checkpoint/osnet_x1_0_market.pth",
+            "checkpoint": "./checkpoint/osnet_x1_0_market_iph_wob.pt",
             "input_size": [128, 256],
             "fp16": false
         }

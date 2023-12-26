@@ -30,6 +30,10 @@ def resize_with_pad(image: np.array,
     left, right = delta_w//2, delta_w-(delta_w//2)
 
     image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT,None,value=padding_color)
+    if image.shape[0] != new_shape[0] or image.shape[1] != new_shape[1]:
+        # Force resize
+        image = cv2.resize(image, new_shape, interpolation=cv2.INTER_LINEAR)
+
     return image
 
 

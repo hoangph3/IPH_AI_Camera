@@ -53,7 +53,7 @@ class Tracker:
 
                     frame_info = pickle.loads(data)
                     img = frame_info.get('frame_data')
-                    frame_count = frame_info.get('frame_count')
+                    timestamp = frame_info.get('frame_count')
                     if img is None:
                         continue
 
@@ -71,7 +71,7 @@ class Tracker:
                     if not len(det_boxes):
                         continue
 
-                    scores = det_boxes[:, 4].astype(np.int32)
+                    scores = det_boxes[:, 4].astype(np.float32)
                     bounding_boxes = det_boxes[:, 0:4].astype(np.int32)
                     selected_indices = processing.non_max_suppression(
                         boxes=bounding_boxes, max_bbox_overlap=self.det_overlap, scores=scores
@@ -85,14 +85,17 @@ class Tracker:
 
                     for xyxy, conf, feature in zip(bounding_boxes, scores, features):
                         xyxy = xyxy.tolist()
-                        conf = float(conf)
                         x1, y1, x2, y2 = xyxy
-                        height_img = y2 - y1
+                        conf = round(float(conf), 4)
                         box_img = img[y1:y2, x1:x2]
+                        height_img = img.shape[0]
                         upper, lower = halve_bbox_y(xyxy) 
 
                         # Filter box & camera zone
                         if (y2 > 2/3 * height_img) or (key not in camera_zone):
+                            logger.info("Not valid box, cause y2: {}, max_y2: {}, cam: {}".format(
+                                y2, 2/3*height_img, key
+                            ))
                             continue
 
                         line_intersect = camera_zone[key]['line_intersect']
@@ -103,18 +106,19 @@ class Tracker:
 
                         if bool_intersect_lower and bool_intersect_upper == False:
                             waypath = 'Up'
-                        if bool_intersect_upper and bool_intersect_lower == False:
+                        elif bool_intersect_upper and bool_intersect_lower == False:
                             waypath = "Down"
+                        else:
+                            waypath = ''
 
                         event = {
                             'camera_id': key,
                             'object_bbox': xyxy,
                             'confidence': conf,
                             'waypath': waypath,
-                            'frame_count': frame_count,
-                            'timestamp': frame_count,
-                            'box_time': box_time,
-                            'line_intersect': line_intersect,
+                            'timestamp': timestamp,
+                            # 'box_time': box_time,
+                            # 'line_intersect': line_intersect,
                             'feature_embeddings': feature.tolist(),
                             'object_image': dataio.convert_numpy_array_to_bytes(box_img),
                             # 'full_image': dataio.convert_numpy_array_to_bytes(img)

@@ -54,9 +54,6 @@ class ReIDMultiBackend(nn.Module):
             x1, y1, x2, y2 = box.astype('int')
             crop = img[y1:y2, x1:x2]
             crop = resize_with_pad(crop, new_shape=input_size)
-            # Filter shape
-            if crop.shape[0] != input_size[0] or crop.shape[1] != input_size[1]:
-                continue
             crop = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
             # Normalize image
             crop = img_norm(crop)

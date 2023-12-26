@@ -32,9 +32,10 @@ def train(model, device, train_loader, optimizer, epoch, margin):
 
 if __name__ == "__main__":
     # Model
-    device = 'cuda'
+    device = "cuda"
+    load_checkpoint_path = "./checkpoint/osnet_x1_0_market.pt"
     reid_backend = ReIDMultiBackend(
-        weights='./checkpoint/osnet_x1_0_market.pt',
+        weights=load_checkpoint_path,
         device=device, fp16=False
     )
     model = reid_backend.model
@@ -49,6 +50,7 @@ if __name__ == "__main__":
 
     num_epochs = 1000
     margin = 1.0
+    save_checkpoint_path = "./checkpoint/osnet_x1_0_market_iph_wob.pt"
     for epoch in range(1, num_epochs + 1):
         train(model, device, data_loader, optimizer, epoch, margin)
-        torch.save(model.state_dict(), "osnet_x1_0_market_iph_wob.pt")
+        torch.save(model.state_dict(), save_checkpoint_path)
