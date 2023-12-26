@@ -12,11 +12,11 @@ build_base:
 build:
 	docker build -f Dockerfile -t $(IMAGE):$(VERSION) .
 
-start_chroma:
-	docker-compose -f tests/chroma-compose.yml up -d
+start_db:
+	docker-compose -f tests/db-compose.yml up -d
 
-stop_chroma:
-	docker-compose -f tests/chroma-compose.yml down
+stop_db:
+	docker-compose -f tests/db-compose.yml down
 
 test:
 	python3 main.py

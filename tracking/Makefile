@@ -12,12 +12,6 @@ build_base:
 build:
 	docker build -f Dockerfile -t $(IMAGE):$(VERSION) .
 
-start_mongo:
-	docker-compose -f tests/mongo-compose.yml up -d
-
-stop_mongo:
-	docker-compose -f tests/mongo-compose.yml down
-
 test:
 	python3 main.py
 
