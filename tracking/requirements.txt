@@ -1,0 +1,7 @@
+ultralytics==8.0.124
+opencv-python==4.6.0.66
+loguru
+redis
+tqdm
+requests
+pymongo

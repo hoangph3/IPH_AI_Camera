@@ -1,4 +1,4 @@
-FROM kotoracompany/mct-camera:base
+FROM kotoracompany/mct-tracking:base
 
 WORKDIR /app
 

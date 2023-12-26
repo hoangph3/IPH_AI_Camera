@@ -1,0 +1,19 @@
+version: "3"
+
+networks:
+  mct-net:
+    name: mct-net
+    external: true
+
+services:
+  mct-camera:
+    image: kotoracompany/mct-tracking:0.1.0
+    container_name: mct_tracking
+    networks:
+      - mct-net
+    runtime: nvidia
+    restart: always
+    volumes:
+      - ./env:/app/env
+      - ./checkpoint:/app/checkpoint
+  

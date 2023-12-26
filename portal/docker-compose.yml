@@ -1,0 +1,14 @@
+version: '3'
+
+networks:
+  mct-net:
+    name: mct-net
+    external: true
+
+services:
+  mct-portal:
+    image: kotoracompany/mct-portal:0.1.0
+    container_name: mct_portal
+    networks:
+      - mct-net
+    restart: always

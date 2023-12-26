@@ -3,8 +3,8 @@ opencv-python
 pandas
 numpy
 loguru
-uvicorn
-fastapi
-pydantic
+uvicorn~=0.17.6
+fastapi~=0.78.0
+pydantic~=1.8.2
 Pillow
 redis

@@ -1,16 +1,12 @@
 {
   "camera": [
-    "/media/hoang/Data/aihub/tracking/raw/video/c3.mp4",
-    "/media/hoang/Data/aihub/tracking/raw/video/c4.mp4",
-    "/media/hoang/Data/aihub/tracking/raw/video/c13.mp4",
-    "/media/hoang/Data/aihub/tracking/raw/video/c11.mp4",
-    "/media/hoang/Data/aihub/tracking/raw/video/c6.mp4"
+    "rtsp://admin:kotora2023@192.168.0.149:8554/stream"
   ],
   "app": {
     "port": 9081
   },
   "redis": {
-    "uri": "redis://localhost:6379/0",
+    "uri": "redis://mct-redis:6379/0",
     "max_size": 75,
     "batch_size": 2,
     "time_retry": 10

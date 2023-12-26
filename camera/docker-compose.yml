@@ -16,3 +16,12 @@ services:
     ports:
       - 9081:9081
     restart: always
+    
+  mct-redis:
+    image: redis:7.0.4
+    container_name: mct_redis
+    networks:
+      - mct-net
+    ports:
+      - 6379:6379
+    restart: always

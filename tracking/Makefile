@@ -16,9 +16,9 @@ test:
 	python3 main.py
 
 start:
-	docker-compose up -d
+	docker compose up -d
 
-install: build start
+install: build_base build start
 
 stop:
 	docker-compose down
