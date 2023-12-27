@@ -16,7 +16,7 @@ test:
 	python3 main.py
 
 start:
-	docker compose up -d
+	docker-compose up -d
 
 install: build_base build start
 
