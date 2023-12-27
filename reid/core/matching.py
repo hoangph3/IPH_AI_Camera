@@ -48,12 +48,28 @@ class Matching:
         logger.info("Matching start.")
 
         while True:
+            # Get last tracking data
+            last_tracking_dt = self.database.get_last_tracking_data()
+            last_tracking_time = last_tracking_dt.get('timestamp')
+            if last_tracking_time is None:
+                time.sleep(self.config.interval)
+                continue
+
             # Get last reid data
             last_reid_dt = self.database.get_last_reid_data()
-            last_reid_time = last_reid_dt.get(self.database.time_field)
-            if isinstance(last_reid_time, (float, int)) and (
-                handler.get_time() - last_reid_time < self.config.batch_time
+            last_reid_time = last_reid_dt.get('query_time')
+            if (last_reid_time is not None) and (
+                (
+                    handler.get_time() - last_reid_time < self.config.batch_time
+                ) or (
+                    last_reid_time - last_tracking_time < self.config.batch_time
+                )
             ):
+                logger.info("Need more data, from last tracking: {}, last reid: {} to: {}".format(
+                    handler.time2datetime(last_tracking_time),
+                    handler.time2datetime(last_reid_time),
+                    handler.time2datetime(handler.get_time())
+                ))
                 time.sleep(self.config.interval)
                 continue
 
@@ -66,6 +82,7 @@ class Matching:
             features = np.array([doc['feature_embeddings'] for doc in tracking_dt])
             cam_ids = np.array([doc['camera_id'] for doc in tracking_dt])
             timestamps = np.array([doc['timestamp'] for doc in tracking_dt])
+            box_images = np.array([doc['object_image'] for doc in tracking_dt])
 
             reid_events = []
 
@@ -99,6 +116,7 @@ class Matching:
                 query = query[nearest_indices.flatten()]
                 cam_id = cam_ids[nearest_indices.flatten()]
                 timestamp = timestamps[nearest_indices.flatten()]
+                box_image = box_images[nearest_indices.flatten()]
 
                 # TODO: Search by query = (num_query, dim)
                 search_query = self.chroma_client.search(
@@ -131,6 +149,8 @@ class Matching:
                         # Get query info
                         query_cam = cam_id[idx]
                         query_time = timestamp[idx]
+                        box_img = box_image[idx]
+
                         neighbor_cam = camera_graph.get(query_cam)
 
                         # Get matching indices
@@ -157,7 +177,8 @@ class Matching:
                                 "global_id": q_meta["global_id"],
                                 "cam_id": q_meta["camera_id"],
                                 "dist": float(match_dist[cidx]),
-                                "rerank_dist": float(rank_dist[cidx])
+                                "rerank_dist": float(rank_dist[cidx]),
+                                "box_img": box_img
                             }
                             q_candidates.append(candidate)
 
@@ -172,6 +193,8 @@ class Matching:
                     for idx in range(len(query)):
                         cid = cam_id[idx]
                         query_time = timestamp[idx]
+                        box_img = box_image[idx]
+
                         ids.append(handler.get_id())
                         metadatas.append({"global_id": gid, "camera_id": cid})
                         reid_event = {
@@ -180,7 +203,8 @@ class Matching:
                             "global_id": gid,
                             "cam_id": cid,
                             "dist": -1,
-                            "rerank_dist": -1
+                            "rerank_dist": -1,
+                            "box_img": box_img
                         }
                         reid_events.append(reid_event)
 

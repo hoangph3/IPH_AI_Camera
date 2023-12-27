@@ -13,7 +13,19 @@ services:
       - ./env:/app/env
     networks:
       - mct-net
-    # restart: always
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+
+  mct-report:
+    image: kotoracompany/mct-reid:0.1.0
+    container_name: mct_report
+    volumes: 
+      - ./env:/app/env
+    networks:
+      - mct-net
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    command: ["python3", "auto_stats.py"]
 
   mct-chroma:
     container_name: mct_chroma

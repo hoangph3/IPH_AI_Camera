@@ -10,6 +10,12 @@
                 "uri": "mongodb://admin:password@mct-mongodb:27017/admin",
                 "database": "iph",
                 "collection": "reid"
+            },
+            "report": {
+                "uri": "mongodb://admin:password@mct-mongodb:27017/admin",
+                "database": "iph",
+                "collection": "report",
+                "batch_time": 3600
             }
         },
         "chroma": {
