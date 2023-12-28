@@ -10,7 +10,33 @@ import re
 from utility.hparams import get_hparams_from_file, config_path
 from utility.handler import get_time
 
-
+# Define the camera ID to IP address mapping
+CAMERA_IP_MAPPING = {
+    "Cam1": "10.0.0.201",
+    "Cam2": "10.0.0.202",
+    "Cam3": "10.0.0.203",
+    "Cam4": "10.0.0.204",
+    "Cam5": "10.0.0.205",
+    "Cam6": "10.0.0.206",
+    "Cam7": "10.0.0.207",
+    "Cam8": "10.0.0.208",
+    "Cam9": "10.0.0.209",
+    "Cam10": "10.0.0.210",
+    "Cam11": "10.0.0.211",
+    "Cam12": "10.0.0.212",
+    "Cam13": "10.0.0.213",
+    "Cam14": "10.0.0.214",
+    "Cam15": "10.0.0.215",
+    "Cam16": "10.0.0.216",
+    "Cam17": "10.0.0.217",
+    "Cam18": "10.0.0.218",
+    "Cam19": "10.0.0.219",
+    "Cam20": "10.0.0.220",
+    "Cam21": "10.0.0.221",
+    "Cam22": "192.168.0.149",
+    "Cam23": "192.168.0.168",
+    "Cam23": "192.168.0.251"
+}
 def read_frame_with_count(source):
     hps = get_hparams_from_file(config_path=config_path)
 
@@ -21,10 +47,13 @@ def read_frame_with_count(source):
     ip_address = extract_ip_from_rtsp(source)
     is_stream = is_stream_source(source)
 
+     # Get the camera ID based on the IP address
+    camera_id = get_camera_id_from_ip(ip_address)
     if Path(source).is_file():
         key = Path(source).resolve().stem
     elif ip_address:
-        key = ip_address
+        # key = ip_address
+        key = camera_id
     else:
         raise ValueError(f"Invalid source: {source}")
 
@@ -94,3 +123,10 @@ def is_stream_source(source):
         return True
 
     return False
+
+def get_camera_id_from_ip(ip_address):
+    # Reverse lookup to find the camera ID based on the IP address
+    for camera_id, camera_ip in CAMERA_IP_MAPPING.items():
+        if camera_ip == ip_address:
+            return camera_id
+    return None
