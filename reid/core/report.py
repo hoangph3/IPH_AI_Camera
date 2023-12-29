@@ -9,11 +9,13 @@ from utility import handler
 from loguru import logger
 
 
+
 class Report:
     def __init__(self, config: HParams) -> None:
         self.config = config
         self.database = Database(config=config)
         self.report_batch_time = config.backend.mongo.report.batch_time
+
 
     def run(self):
         batch_time = timedelta(hours=self.report_batch_time // 3600)
@@ -44,59 +46,64 @@ class Report:
                     minute=0, second=0
                 )
             else:
-                start_time = last_report_time
+                start_time = last_report_time.replace(
+                    minute=0, second=0
+                )
 
             end_time = handler.get_datetime()
-
-            # Split time by batch_time
-            time_boxes = handler.split_time(
-                start_time=start_time,
-                end_time=end_time,
-                batch_time=batch_time
-            )
-
-            report_data = []
-            for time_box in time_boxes:
-                datetime_from, datetime_to = time_box
-
-                time_from = handler.datetime2time(datetime_from)
-                time_to = handler.datetime2time(datetime_to)
-                reid_batch_data = self.database.get_history_reid_data(
-                    time_from=time_from, time_to=time_to
-                )
-
-                logger.info(
-                    "Count: {} reid data from: {} to: {}".format(
-                        len(reid_batch_data), datetime_from, datetime_to
-                    )
+            
+            if end_time.minute == 0 and end_time.second == 0:
+                end_time.replace(
+                    minute=0, second=0
                 )
                 
-                if not len(reid_batch_data):
-                    continue
-
-                reid_df = pd.DataFrame(reid_batch_data)
-                display(reid_df)
-
-                camera_counts = {}
-                for cam_id, cam_df in reid_df.groupby('query_cam'):
-                    camera_counts[cam_id] = len(cam_df['global_id'].unique())
-
-                num_ids = len(reid_df['global_id'].unique())
-                doc = {
-                    'start_time': datetime_from,
-                    'end_time': datetime_to,
-                    'camera_counts': camera_counts,
-                    'count': num_ids
-                }
-                logger.info(
-                    "Report from: {} to: {}: {}".format(
-                        datetime_from, datetime_to, doc
-                    )
+                time_boxes = handler.split_time(
+                    start_time=start_time,
+                    end_time=end_time,
+                    batch_time=batch_time
                 )
 
-                report_data.append(doc)
+                report_data = []
+                for time_box in time_boxes:
+                        datetime_from, datetime_to = time_box
 
-            if len(report_data):
-                self.database.write_report_data(data=report_data)
+                        time_from = handler.datetime2time(datetime_from)
+                        time_to = handler.datetime2time(datetime_to)               
+                        reid_batch_data = self.database.get_history_reid_data(
+                            time_from=time_from, time_to=time_to
+                        )
 
-            time.sleep(idle_time)
+
+                        logger.info(
+                            "Count: {} reid data from: {} to: {}".format(
+                                len(reid_batch_data), datetime_from, datetime_to
+                            )
+                        )
+                        
+                        if not len(reid_batch_data):
+                            continue
+                                                
+                        reid_df = pd.DataFrame(reid_batch_data)
+                        display(reid_df)
+                        camera_counts = {}
+                        for cam_id, cam_df in reid_df.groupby('query_cam'):
+                            camera_counts[cam_id] = len(cam_df['global_id'].unique())
+
+                        num_ids = len(reid_df['global_id'].unique())
+                        doc = {
+                            'start_time': datetime_from,
+                            'end_time': datetime_to,
+                            'camera_counts': camera_counts,
+                            'count': num_ids
+                        }
+                        logger.info(
+                            "Report from: {} to: {}: {}".format(
+                                datetime_from, datetime_to, doc
+                            )
+                        )
+                        report_data.append(doc)
+
+                if len(report_data):
+                    self.database.write_report_data(data=report_data)
+
+                time.sleep(idle_time)

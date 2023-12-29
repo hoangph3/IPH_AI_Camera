@@ -62,7 +62,7 @@ class Matching:
                 (
                     handler.get_time() - last_reid_time < self.config.batch_time
                 ) or (
-                    last_reid_time - last_tracking_time < self.config.batch_time
+                    last_tracking_time - last_reid_time  < self.config.batch_time
                 )
             ):
                 logger.info("Need more data, from last tracking: {}, last reid: {} to: {}".format(

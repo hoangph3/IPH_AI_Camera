@@ -13,6 +13,7 @@ services:
       - ./env:/app/env
     networks:
       - mct-net
+    restart: always
     environment:
       - TZ=Asia/Ho_Chi_Minh
 
@@ -23,6 +24,7 @@ services:
       - ./env:/app/env
     networks:
       - mct-net
+    restart: always
     environment:
       - TZ=Asia/Ho_Chi_Minh
     command: ["python3", "auto_stats.py"]

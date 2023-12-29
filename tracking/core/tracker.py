@@ -111,6 +111,9 @@ class Tracker:
                         else:
                             waypath = ''
 
+                        if waypath is not "Down":
+                            continue
+
                         event = {
                             'camera_id': key,
                             'object_bbox': xyxy,
