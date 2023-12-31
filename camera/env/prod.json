@@ -1,6 +1,13 @@
 {
   "camera": [
-    "rtsp://admin:kotora2023@192.168.0.149:8554/stream"
+    {
+      "id": "cam1",
+      "uri": "rtsp://192.168.1.1:8554/stream"
+    },
+    {
+      "id": "cam2",
+      "uri": "rtsp://192.168.1.2:8554/stream"
+    }
   ],
   "app": {
     "port": 9081
@@ -9,6 +16,6 @@
     "uri": "redis://mct-redis:6379/0",
     "max_size": 75,
     "batch_size": 2,
-    "time_retry": 10
+    "time_retry": 1
   }
 }
