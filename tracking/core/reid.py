@@ -96,7 +96,7 @@ class ReIDMultiBackend(nn.Module):
 
     @torch.no_grad()
     def get_features(self, xyxys, img, input_size=(128, 256)):
-        if xyxys.size != 0:
+        if len(xyxys):
             crops = self.preprocess(xyxys, img, input_size)
             features = self.forward(crops)
         else:

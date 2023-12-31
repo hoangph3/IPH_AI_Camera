@@ -1,24 +1,30 @@
 {
     "backend": {
         "redis": {
-            "uri": "redis://mct-redis:6379/0"
+            "uri": "redis://localhost:6379/0"
         },
         "mongo": {
             "tracking": {
-                "uri": "mongodb://admin:password@192.168.0.149:27017/admin",
+                "uri": "mongodb://admin:password@localhost:27017/admin",
                 "database": "iph",
-                "collection": "tracking_test"
+                "collection": "tracking"
             }
         }
     },
     "model": {
         "detect": {
-            "checkpoint": "./checkpoint/yolov5nu.engine",
+            "checkpoint": "./checkpoint/yolov5nu.pt",
             "conf": 0.7,
             "overlap": 0.3,
             "classes": [
                 0
             ]
+        },
+        "track": {
+            "track_type": "bytetrack",
+            "track_config": "./checkpoint/bytetrack.yaml",
+            "using": true,
+            "save_crop": true
         },
         "reid": {
             "checkpoint": "./checkpoint/osnet_x1_0_market_iph_wob.pt",
