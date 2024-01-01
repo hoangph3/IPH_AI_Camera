@@ -2,34 +2,34 @@
     "backend": {
         "mongo": {
             "tracking": {
-                "uri": "mongodb://admin:password@mct-mongodb:27017/admin",
+                "uri": "mongodb://admin:password@localhost:27017/admin",
                 "database": "iph",
                 "collection": "tracking"
             },
             "reid": {
-                "uri": "mongodb://admin:password@mct-mongodb:27017/admin",
+                "uri": "mongodb://admin:password@localhost:27017/admin",
                 "database": "iph",
                 "collection": "reid"
             },
             "report": {
-                "uri": "mongodb://admin:password@mct-mongodb:27017/admin",
+                "uri": "mongodb://admin:password@localhost:27017/admin",
                 "database": "iph",
                 "collection": "report",
                 "batch_time": 3600
             }
         },
         "chroma": {
-            "host": "mct-chroma",
+            "host": "localhost",
             "port": 8000,
             "collection": "reid"
         }
     },
     "clustering": {
-        "threshold": 0.3,
+        "threshold": 0.6,
         "linkage": "complete"
     },
     "matching": {
-        "threshold": 0.3,
+        "threshold": 0.6,
         "top_k": 10
     },
     "rerank": {

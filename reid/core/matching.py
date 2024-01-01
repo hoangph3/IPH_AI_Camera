@@ -85,8 +85,6 @@ class Matching:
             timestamps = np.array([doc['timestamp'] for doc in tracking_dt])
             box_images = np.array([doc['object_image'] for doc in tracking_dt])
 
-            reid_events = []
-
             # TODO: Clustering
             clustering_params = {
                 'n_clusters': None,
@@ -103,6 +101,8 @@ class Matching:
 
             # TODO: Get queries
             for cluster_idx in range(num_clusters):
+                reid_events = []
+
                 # Arrange query by cluster id
                 cluster_indices = labels == cluster_idx
                 query = features[cluster_indices]
@@ -117,8 +117,8 @@ class Matching:
                 )  # (n_query, k)
 
                 q_nbrs_dists = search_query['distances']
-                q_nbrs_metas = search_query['distances']
-                q_nbrs_embeds = search_query['distances']
+                q_nbrs_metas = search_query['metadatas']
+                q_nbrs_embeds = search_query['embeddings']
 
                 # Build candidates
                 q_candidates = []
@@ -170,16 +170,16 @@ class Matching:
                 for qidx in range(len(query)):
                     event = {
                         "query_cam": cam_id[qidx],
-                        "query_time": timestamp[qidx],
+                        "query_time": int(timestamp[qidx]),
                         "global_id": global_id,
                         'dist': dist,
                         "box_img": box_image[qidx]
                     }
                     reid_events.append(event)
 
-            # Write reid logs
-            logger.info("Reid: {} events".format(len(reid_events)))
-            self.database.write_reid_data(data=reid_events)
+                # Write reid logs
+                logger.info("Reid: {} events".format(len(reid_events)))
+                self.database.write_reid_data(data=reid_events)
 
             # Wait to flush
             time.sleep(self.config.interval)
