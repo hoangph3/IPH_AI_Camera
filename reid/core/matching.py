@@ -1,6 +1,7 @@
 from sklearn.cluster import AgglomerativeClustering, DBSCAN
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cdist
+from collections import defaultdict
 from loguru import logger
 import numpy as np
 import pandas as pd
@@ -103,20 +104,11 @@ class Matching:
             # TODO: Get queries
             for cluster_idx in range(num_clusters):
                 # Arrange query by cluster id
-                query = features[labels == cluster_idx]
-                # Compute centroids
-                centroid = self.get_centroids(query)
-
-                # Get nearest neighbors of centroid
-                nbrs = NearestNeighbors(
-                    n_neighbors=min(self.config.clustering.n_neighbors, len(query)),
-                    metric=self.config.metric
-                ).fit(query)
-                nearest_indices = nbrs.kneighbors([centroid], return_distance=False)
-                query = query[nearest_indices.flatten()]
-                cam_id = cam_ids[nearest_indices.flatten()]
-                timestamp = timestamps[nearest_indices.flatten()]
-                box_image = box_images[nearest_indices.flatten()]
+                cluster_indices = labels == cluster_idx
+                query = features[cluster_indices]
+                cam_id = cam_ids[cluster_indices]
+                timestamp = timestamps[cluster_indices]
+                box_image = box_images[cluster_indices]
 
                 # TODO: Search by query = (num_query, dim)
                 search_query = self.chroma_client.search(
@@ -124,104 +116,66 @@ class Matching:
                     embeddings=query, topk=self.config.matching.top_k
                 )  # (n_query, k)
 
-                q_nbrs_dists, q_nbrs_metas, q_nbrs_embeds = self.get_matching_neighbors(
-                    q_nbrs_dists=search_query['distances'],
-                    q_nbrs_metas=search_query['metadatas'],
-                    q_nbrs_embeds=search_query['embeddings']
-                )  # to be flattened to: (n_query x valid_k, )
-                gallery = q_nbrs_embeds
+                q_nbrs_dists = search_query['distances']
+                q_nbrs_metas = search_query['distances']
+                q_nbrs_embeds = search_query['distances']
 
                 # Build candidates
                 q_candidates = []
 
-                ## Re-ranking
-                if len(query) and len(gallery):
-                    q_g_dist = cdist(query, gallery, self.config.metric)  # (n_query, n_query x valid_k, )
-                    q_q_dist = cdist(query, query, self.config.metric)
-                    g_g_dist = cdist(gallery, gallery, self.config.metric)
-                    rerank_dist = re_ranking(
-                        q_g_dist=q_g_dist, q_q_dist=q_q_dist, g_g_dist=g_g_dist,
-                        k1=self.config.rerank.k1, k2=self.config.rerank.k2,
-                        lambda_value=self.config.rerank.lambda_value
-                    )  # (n_query, n_query x valid_k, )
+                for qidx in range(len(query)):
+                    query_cam = cam_id[qidx]
+                    neighbor_cam = camera_graph.get(query_cam)
 
-                    for idx in range(len(query)):
-                        # Get query info
-                        query_cam = cam_id[idx]
-                        query_time = timestamp[idx]
-                        box_img = box_image[idx]
+                    q_dists = q_nbrs_dists[qidx]
+                    q_metas = q_nbrs_metas[qidx]
+                    q_embeds = q_nbrs_embeds[qidx]
 
-                        neighbor_cam = camera_graph.get(query_cam)
+                    for q_dist, q_meta, q_embed in zip(q_dists, q_metas, q_embeds):
+                        # Remove outliers
+                        if q_dist > self.config.matching.threshold:
+                            continue
+                        if neighbor_cam and q_meta["camera_id"] not in neighbor_cam:
+                            continue
 
-                        # Get matching indices
-                        match_dist = q_g_dist[idx]
-                        match_indices = np.where(match_dist <= self.config.matching.threshold)[0].tolist()
-                        
-                        # Get ranking indices
-                        rank_dist = rerank_dist[idx]
-                        rank_indices = np.where(rank_dist <= self.config.rerank.threshold)[0].tolist()
+                        q_candidates.append({
+                            'global_id': q_meta["global_id"],
+                            'dist': q_dist
+                        })
 
-                        # Get intersection indices
-                        candidate_indices = set(match_indices).intersection(set(rank_indices))
-
-                        # Get candidates
-                        for cidx in candidate_indices:
-                            q_meta = q_nbrs_metas[cidx]
-                            # continue if out scope of query camera
-                            if neighbor_cam and (query_cam not in neighbor_cam):
-                                continue
-
-                            candidate = {
-                                "query_cam": query_cam,
-                                "query_time": int(query_time),
-                                "global_id": q_meta["global_id"],
-                                "cam_id": q_meta["camera_id"],
-                                "dist": float(match_dist[cidx]),
-                                "rerank_dist": float(rank_dist[cidx]),
-                                "box_img": box_img
-                            }
-                            q_candidates.append(candidate)
-
-                # TODO: Check neighbors is exists or not
-                if not len(q_candidates):
-                    # Generate new global_id
-                    gid = handler.get_id(short=True)
-                    ids = []
-                    metadatas = []
-
-                    # Create reid event
-                    for idx in range(len(query)):
-                        cid = cam_id[idx]
-                        query_time = timestamp[idx]
-                        box_img = box_image[idx]
-
-                        ids.append(handler.get_id())
-                        metadatas.append({"global_id": gid, "camera_id": cid})
-                        reid_event = {
-                            "query_cam": cid,
-                            "query_time": int(query_time),
-                            "global_id": gid,
-                            "cam_id": cid,
-                            "dist": -1,
-                            "rerank_dist": -1,
-                            "box_img": box_img
-                        }
-                        reid_events.append(reid_event)
-
-                    # Insert new global_id
+                # Candidates found
+                if len(q_candidates):
+                    df = pd.DataFrame(q_candidates)
+                    stats = []
+                    for global_id, sub_df in df.groupby('global_id'):
+                        stats.append({
+                            'global_id': global_id,
+                            'dist': float(np.mean(sub_df['dist'].values.tolist()))
+                        })
+                    stats = sorted(stats, key=lambda d: d['dist'])
+                    global_id = stats[0]['global_id']
+                    dist = stats[0]['dist']
+                else:
+                    global_id = handler.get_id(short=True)
+                    # Add new global_id
                     self.chroma_client.insert(
                         collection=self.config.backend.chroma.collection,
                         embeddings=query,
-                        ids=ids,
-                        metadatas=metadatas
+                        ids=[handler.get_id() for _ in range(len(query))],
+                        metadatas=[{"global_id": global_id, "camera_id": cid} for cid in cam_id]
                     )
-                else:
-                    q_df = pd.DataFrame(q_candidates)
-                    # Sort by dist & rerank_dist
-                    q_df = q_df.sort_values(by=['rerank_dist', 'dist'])
-                    # Get top 1
-                    reid_event = q_df.iloc[0].to_dict()
-                    reid_events.append(reid_event)
+                    dist = -1
+
+                # Reid events
+                for qidx in range(len(query)):
+                    event = {
+                        "query_cam": cam_id[qidx],
+                        "query_time": timestamp[qidx],
+                        "global_id": global_id,
+                        'dist': dist,
+                        "box_img": box_image[qidx]
+                    }
+                    reid_events.append(event)
 
             # Write reid logs
             logger.info("Reid: {} events".format(len(reid_events)))

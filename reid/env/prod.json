@@ -25,13 +25,12 @@
         }
     },
     "clustering": {
-        "threshold": 0.6,
-        "linkage": "average",
-        "n_neighbors": 5
+        "threshold": 0.3,
+        "linkage": "complete"
     },
     "matching": {
-        "threshold": 0.6,
-        "top_k": 20
+        "threshold": 0.3,
+        "top_k": 10
     },
     "rerank": {
         "k1": 20,
