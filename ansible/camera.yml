@@ -1,0 +1,7 @@
+- name: Camera install
+  hosts: jetson
+  become: true
+  tasks:
+    - include_role:
+        name: camera
+        tasks_from: install

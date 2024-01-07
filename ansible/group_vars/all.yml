@@ -1,0 +1,54 @@
+docker:
+  compose_version: v2.4.1
+
+remote_install_path: "/opt/{{ docker.package }}"
+
+
+log:
+  max_size: 2m
+  max_file: 10
+camera:
+  compose_dir:
+  image:
+
+tracking:
+  compose_dir:
+  image:
+reid:
+  compose_dir: "{{ remote_install_path }}/reid"
+  image: ""
+  
+
+portal:
+  compose_dir:
+  image:
+  
+database:
+  mongodb:
+    compose_dir: "{{ remote_install_path }}/database"
+    image: "mongo:6.0.1"
+    service_name: "{{ docker.package }}-mongodb"
+    username: admin
+    password: password
+    port: 27017
+  mongoexp:
+    compose_dir: "{{ remote_install_path }}/database"
+    image: "mongo-express:1.0.0-alpha"
+    service_name: "{{ docker.package }}-mongoexp"
+    port: 8081
+
+queue:
+  compose_dir: "{{ remote_install_path }}/queue"
+  redis:
+    image: "redis:7.0.4"
+    service_name: "{{ docker.package }}-redis"
+    port: 6379
+
+
+
+
+
+
+
+
+

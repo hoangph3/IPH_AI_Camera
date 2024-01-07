@@ -1,0 +1,15 @@
+- import_playbook: common.yml
+
+- import_playbook: database.yml
+
+- import_playbook: queue.yml
+
+- import_playbook: camera.yml
+
+- import_playbook: tracking.yml
+
+- import_playbook: reid.yml
+
+- import_playbook: portal.yml
+
+
