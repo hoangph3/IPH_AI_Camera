@@ -1,1 +1,13 @@
-te
+version: "3.2"
+
+services:
+    {{ camera.service_name }}:
+    extends:
+      file: {{ remote_install_path }}/common.yml
+      service: common
+    image: {{ camera.image }}
+    container_name: {{ camera.service_name }}
+    restart: always
+    volumes:
+      - ./env/prod.json:/app/env/prod.json
+    restart: always
