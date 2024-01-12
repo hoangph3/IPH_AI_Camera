@@ -56,7 +56,7 @@ class Tracker(Detection):
                             half=False,
                             per_class=True
                         )
-                    if key not in exlcuded_ids:
+                    if key not in excluded_ids:
                         excluded_ids[key] = []
 
                     data = self.redis_client.lpop(key)
