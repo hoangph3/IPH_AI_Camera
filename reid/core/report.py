@@ -72,7 +72,9 @@ class Report:
                         reid_batch_data = self.database.get_history_reid_data(
                             time_from=time_from, time_to=time_to
                         )
-
+                        tracking_batch_data = self.database.get_history_tracking_data(
+                            time_from=time_from, time_to=time_to
+                        )
 
                         logger.info(
                             "Count: {} reid data from: {} to: {}".format(
@@ -82,18 +84,24 @@ class Report:
                         
                         if not len(reid_batch_data):
                             continue
-                                                
+
                         reid_df = pd.DataFrame(reid_batch_data)
-                        display(reid_df)
+                        tracking_df = pd.DataFrame(tracking_batch_data)
+
                         camera_counts = {}
+                        for cam_id, cam_df in tracking_df.groupby('camera_id'):
+                            camera_counts[cam_id] = len(cam_df['object_id'].unique())
+
+                        reid_counts = {}
                         for cam_id, cam_df in reid_df.groupby('query_cam'):
-                            camera_counts[cam_id] = len(cam_df['global_id'].unique())
+                            reid_counts[cam_id] = len(cam_df['global_id'].unique())
 
                         num_ids = len(reid_df['global_id'].unique())
                         doc = {
                             'start_time': datetime_from,
                             'end_time': datetime_to,
                             'camera_counts': camera_counts,
+                            'reid_counts': reid_counts,
                             'count': num_ids
                         }
                         logger.info(

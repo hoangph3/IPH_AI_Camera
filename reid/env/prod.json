@@ -2,34 +2,34 @@
     "backend": {
         "mongo": {
             "tracking": {
-                "uri": "mongodb://admin:password@localhost:27017/admin",
+                "uri": "mongodb://admin:password@mct-mongodb:27017/admin",
                 "database": "iph",
                 "collection": "tracking"
             },
             "reid": {
-                "uri": "mongodb://admin:password@localhost:27017/admin",
+                "uri": "mongodb://admin:password@mct-mongodb:27017/admin",
                 "database": "iph",
                 "collection": "reid"
             },
             "report": {
-                "uri": "mongodb://admin:password@localhost:27017/admin",
+                "uri": "mongodb://admin:password@mct-mongodb:27017/admin",
                 "database": "iph",
                 "collection": "report",
                 "batch_time": 3600
             }
         },
         "chroma": {
-            "host": "localhost",
+            "host": "mct-chroma",
             "port": 8000,
             "collection": "reid"
         }
     },
     "clustering": {
-        "threshold": 0.6,
+        "threshold": 0.2,
         "linkage": "complete"
     },
     "matching": {
-        "threshold": 0.6,
+        "threshold": 0.04,
         "top_k": 10
     },
     "rerank": {
@@ -40,6 +40,6 @@
     },
     "metric": "euclidean",
     "interval": 5,
-    "batch_time": 600,
-    "batch_size": 1000
+    "batch_time": 1800,
+    "batch_size": 100000
 }

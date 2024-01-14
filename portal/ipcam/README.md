@@ -1,1 +1,0 @@
-- Run nodejs server for feed camera rtsp: "npm start"

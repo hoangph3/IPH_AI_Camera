@@ -13,6 +13,8 @@ __pycache__/
 temp/
 *.whl
 volumes/
+node_modules
+node_modules.bak
 
 # Distribution / packaging
 .Python
