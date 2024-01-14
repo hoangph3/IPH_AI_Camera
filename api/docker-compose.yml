@@ -6,3 +6,5 @@ services:
     container_name: mct_api
     restart: always
     network_mode: host
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
