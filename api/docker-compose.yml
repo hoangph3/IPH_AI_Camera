@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  mct-api:
+    image: kotoracompany/mct-api:0.1.0
+    container_name: mct_api
+    restart: always
+    network_mode: host
