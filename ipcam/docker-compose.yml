@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  mct-rtsp-stream:
+    image: kotoracompany/mct-rtsp-stream:0.1.0
+    container_name: mct_rtsp_stream
+    restart: always
+    network_mode: host

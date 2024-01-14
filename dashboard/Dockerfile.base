@@ -1,0 +1,10 @@
+FROM node:14
+
+WORKDIR /app
+
+COPY . .
+
+RUN apt-get update -y && \
+    apt-get install vim nano telnet curl -y
+
+RUN npm install 

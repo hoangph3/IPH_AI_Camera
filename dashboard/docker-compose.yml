@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  mct-dashboard:
+    image: kotoracompany/mct-dashboard:0.1.0
+    container_name: mct_dashboard
+    restart: always
+    network_mode: host
