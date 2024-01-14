@@ -10,7 +10,7 @@ services:
     image: kotoracompany/mct-camera:0.1.0
     container_name: mct_camera
     volumes: 
-      - ./env/prod.json:/app/env/config.json
+      - ./env/prod.json:/app/env/prod.json
     networks:
       - mct-net
     ports:

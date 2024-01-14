@@ -1,0 +1,29 @@
+{
+  "camera": [
+    {
+      "id": "Cam9",
+      "uri": "{{rtsp.Cam9}}"
+    },
+    {
+      "id": "Cam10",
+      "uri": "{{rtsp.Cam10}}"
+    },
+    {
+      "id": "Cam11",
+      "uri": "{{rtsp.Cam11}}"
+    },
+    {
+      "id": "Cam12",
+      "uri": "{{rtsp.Cam12}}"
+    },
+  ],
+  "app": {
+    "port": 9081
+  },
+  "redis": {
+    "uri": "redis://{{database.redis.service_name}}:6379/0",
+    "max_size": 75,
+    "batch_size": 2,
+    "time_retry": 1
+  }
+}

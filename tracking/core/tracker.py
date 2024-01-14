@@ -35,6 +35,7 @@ class Tracker(Detection):
         prev_frame_time = 0
         self.trackers = self.build_trackers()
         object_ids_per_tracker = defaultdict(lambda: defaultdict(list))
+        excluded_ids = {}
 
         while True:
             track_events = []  # track_events need to be inserted to mongo
@@ -55,6 +56,8 @@ class Tracker(Detection):
                             half=False,
                             per_class=True
                         )
+                    if key not in excluded_ids:
+                        excluded_ids[key] = []
 
                     data = self.redis_client.lpop(key)
 
@@ -106,8 +109,10 @@ class Tracker(Detection):
                             logger.info("Not valid box, cause y2: {}, max_y2: {}, cam: {}".format(
                                 y2, 2/3*height_img, key
                             ))
+                            excluded_ids[key].append(object_id)
                             continue
-
+                        if object_id in excluded_ids[key]:
+                            continue
                         line_intersect = camera_zone[key]['line_intersect']
                         box_time = camera_zone[key]['box_time']
 

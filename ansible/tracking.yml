@@ -1,0 +1,7 @@
+- name: Tracking install
+  hosts: jetson
+  become: true
+  tasks:
+    - include_role:
+        name: tracking
+        tasks_from: install

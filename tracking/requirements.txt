@@ -1,9 +1,9 @@
 boxmot
-ultralytics==8.0.124
-opencv-python==4.6.0.66
+ultralytics
+opencv-python
 loguru
 redis
 tqdm
 requests
 pymongo
-numpy==1.23.5
+numpy

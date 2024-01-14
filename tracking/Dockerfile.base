@@ -5,13 +5,12 @@ RUN apt-get update -y && \
     apt-get install -y libsm6 libxext6 libxrender-dev libpng-dev
 
 COPY ./requirements.txt /tmp/requirements.txt
-COPY lib /tmp/lib
+
 
 RUN python3 -m pip install -U pip && \
     python3 -m pip install -r /tmp/requirements.txt && \
     # python3 -m pip install /tmp/lib/torch-2.0.0+nv23.05-cp38-cp38-linux_aarch64.whl && \
     # python3 -m pip install /tmp/lib/torchaudio-2.0.1+3b40834-cp38-cp38-linux_aarch64.whl && \
     # python3 -m pip install /tmp/lib/torchvision-0.15.1a0+42759b1-cp38-cp38-linux_aarch64.whl && \ 
-    rm -rf /tmp/requirements.txt && rm -rf /tmp/lib
-    
+    rm -rf /tmp/requirements.txt
 CMD ["bash"]
