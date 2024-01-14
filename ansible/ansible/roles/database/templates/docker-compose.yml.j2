@@ -1,0 +1,56 @@
+version: "3.2"
+
+networks:
+  {{ docker.network }}:
+    name: {{ docker.network }}
+    external: true
+
+services:
+  {{ database.mongodb.service_name }}:
+    extends:
+      file: {{ remote_install_path }}/common.yml
+      service: common
+    image: {{ database.mongodb.image }}
+    container_name: {{ database.mongodb.container_name }}
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME={{ database.mongodb.username }}
+      - MONGO_INITDB_ROOT_PASSWORD={{ database.mongodb.password }}
+    restart: always
+    ports:
+      - {{ database.mongodb.port }}:27017
+    volumes:
+      - "{{ database.compose_dir }}/mongodb:/data/db"
+    networks:
+      - {{ docker.network }}
+
+  {{ database.mongoexp.service_name }}:
+    extends:
+      file: {{ remote_install_path }}/common.yml
+      service: common
+    image: {{ database.mongoexp.image }}
+    container_name: {{ database.mongoexp.service_name }}
+    environment:
+      - ME_CONFIG_MONGODB_SERVER={{ database.mongodb.service_name }}
+      - ME_CONFIG_MONGODB_ADMINUSERNAME={{ database.mongodb.username }}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD={{ database.mongodb.password }}
+    restart: always
+    ports:
+      - {{ database.mongoexp.port }}:8081
+    networks:
+      - {{ docker.network }}
+
+  {{ database.chromadb.service_name }}:
+    extends:
+      file: {{ remote_install_path }}/common.yml
+      service: common
+    image: {{ database.chromadb.image }}
+    container_name: {{ database.chromadb.service_name }}
+    environment:
+      - IS_PERSISTENT=TRUE
+    restart: always
+    volumes:
+      - "{{ database.compose_dir }}/chromadb:/chroma/chroma/"
+    ports:
+      - {{ database.chromadb.port }}:8000
+    networks:
+      - {{ docker.network }}

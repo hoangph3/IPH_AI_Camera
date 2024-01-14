@@ -1,0 +1,17 @@
+- name: Delete network
+  shell: |
+    docker network rm "{{ project.network }}"
+  ignore_errors: True
+
+- name: Backup data
+  become: yes
+  copy:
+    remote_src: yes
+    src: "{{ remote_install_path }}/"
+    dest: "{{ remote_install_path }}.bak"
+  ignore_errors: True
+
+- name: Clean data
+  file:
+    path: "{{ remote_install_path }}"
+    state: absent

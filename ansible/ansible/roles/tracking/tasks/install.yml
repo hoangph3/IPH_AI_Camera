@@ -1,0 +1,31 @@
+- name: Create {{ tracking.compose_dir }} if it's not exists
+  file:
+    path: "{{ tracking.compose_dir }}"
+    state: directory
+    recurse: yes
+
+- name: Move {{ tracking.compose_dir }}/ files
+  copy:
+    src: "../files/"
+    dest: "{{ tracking.compose_dir }}"
+
+- name: Move {{ tracking.compose_dir }}/ templates directory
+  file:
+    path: "{{ tracking.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates
+  when: item.state == 'directory'
+
+- name: Move {{ tracking.compose_dir }}/ templates file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ tracking.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates
+  when: item.state == 'file'
+
+- name: Up tracking service
+  shell:
+    cmd: docker-compose down && docker-compose up -d
+    chdir: "{{ tracking.compose_dir }}"

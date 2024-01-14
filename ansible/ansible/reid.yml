@@ -1,0 +1,7 @@
+- name: ReID install
+  hosts: server
+  become: true
+  tasks:
+    - include_role:
+        name: reid
+        tasks_from: install

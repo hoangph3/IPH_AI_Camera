@@ -1,0 +1,4 @@
+- name: Start services
+  shell: |
+    for i in $(find {{ remote_install_path }} -type f | grep docker-compose.yml); do docker-compose -f $i up -d; done
+  ignore_errors: True

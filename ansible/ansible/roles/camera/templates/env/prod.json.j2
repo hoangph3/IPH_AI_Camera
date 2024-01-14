@@ -1,0 +1,9 @@
+{
+  "camera": {{ camera_rtsp_link | to_json(indent=2) }},
+  "redis": {
+    "uri": "redis://{{ queue.redis.service_name }}:6379/0",
+    "max_size": {{ camera.max_size }},
+    "batch_size": {{ camera.batch_size }},
+    "time_retry": {{ camera.time_retry }}
+  }
+}

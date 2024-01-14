@@ -1,0 +1,45 @@
+{
+    "backend": {
+        "mongo": {
+            "tracking": {
+                "uri": "mongodb://{{ database.mongodb.username }}:{{ database.mongodb.password }}@{{ hostvars['server'].ansible_host }}:{{ database.mongodb.port }}/admin",
+                "database": "{{ settings.tenant }}",
+                "collection": "tracking"
+            },
+            "reid": {
+                "uri": "mongodb://{{ database.mongodb.username }}:{{ database.mongodb.password }}@{{ hostvars['server'].ansible_host }}:{{ database.mongodb.port }}/admin",
+                "database": "{{ settings.tenant }}",
+                "collection": "reid"
+            },
+            "report": {
+                "uri": "mongodb://{{ database.mongodb.username }}:{{ database.mongodb.password }}@{{ hostvars['server'].ansible_host }}:{{ database.mongodb.port }}/admin",
+                "database": "{{ settings.tenant }}",
+                "collection": "report",
+                "batch_time": 3600
+            }
+        },
+        "chroma": {
+            "host": "{{ database.chromadb.service_name }}",
+            "port": 8000,
+            "collection": "reid"
+        }
+    },
+    "clustering": {
+        "threshold": {{ clustering.threshold }},
+        "linkage": "{{ clustering.linkage }}"
+    },
+    "matching": {
+        "threshold": {{ matching.threshold }},
+        "top_k": 10
+    },
+    "rerank": {
+        "k1": 20,
+        "k2": 6,
+        "lambda_value": 0.3,
+        "threshold": 0.6
+    },
+    "metric": "{{ settings.metric }}",
+    "interval": 5,
+    "batch_time": 1800,
+    "batch_size": 100000
+}

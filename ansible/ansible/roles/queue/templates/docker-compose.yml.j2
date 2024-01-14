@@ -1,0 +1,21 @@
+version: "3.2"
+
+networks:
+  {{ docker.network }}:
+    name: {{ docker.network }}
+    external: true
+
+services:
+  {{ queue.redis.service_name }}:
+    extends:
+      file: {{ remote_install_path }}/common.yml
+      service: common
+    image: {{ queue.redis.image }}
+    container_name: {{ queue.redis.container_name }}
+    restart: always
+    ports:
+      - "{{ queue.redis.port }}:6379"
+    volumes:
+      - "./data:/data"
+    networks:
+      - {{ docker.network }}

@@ -1,0 +1,26 @@
+- name: Create {{ camera.compose_dir }} if it's not exists
+  file:
+    path: "{{ camera.compose_dir }}"
+    state: directory
+    recurse: yes
+
+- name: Move {{ camera.compose_dir }}/ templates directory
+  file:
+    path: "{{ camera.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates
+  when: item.state == 'directory'
+
+- name: Move {{ camera.compose_dir }}/ templates file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ camera.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates
+  when: item.state == 'file'
+
+- name: Up camera service
+  shell:
+    cmd: docker-compose down && docker-compose up -d
+    chdir: "{{ camera.compose_dir }}"

@@ -1,0 +1,19 @@
+version: "3"
+
+networks:
+  {{ docker.network }}:
+    name: {{ docker.network }}
+    external: true
+
+services:
+  {{ camera.service_name }}:
+    extends:
+      file: {{ remote_install_path }}/common.yml
+      service: common
+    image: {{ camera.image }}
+    container_name: {{ camera.container_name }}
+    volumes: 
+      - ./env/prod.json:/app/env/prod.json
+    networks:
+      - {{ docker.network }}
+    restart: always

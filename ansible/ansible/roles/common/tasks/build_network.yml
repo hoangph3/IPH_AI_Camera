@@ -1,0 +1,4 @@
+- name: Create network {{ docker.network }}
+  shell: |
+    docker network create "{{ docker.network }}"
+  ignore_errors: True

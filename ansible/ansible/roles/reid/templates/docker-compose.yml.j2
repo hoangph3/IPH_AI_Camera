@@ -1,0 +1,32 @@
+version: "3"
+
+networks:
+  {{ docker.network }}:
+    name: {{ docker.network }}
+    external: true
+
+services:
+  {{ reid.service_name }}:
+    extends:
+      file: {{ remote_install_path }}/common.yml
+      service: common
+    image: {{ reid.image }}
+    container_name: {{ reid.container_name }}
+    volumes: 
+      - ./env:/app/env
+    networks:
+      - {{ docker.network }}
+    restart: always
+
+  {{ report.service_name }}:
+    extends:
+      file: {{ remote_install_path }}/common.yml
+      service: common
+    image: {{ report.image }}
+    container_name: {{ report.container_name }}
+    volumes: 
+      - ./env:/app/env
+    networks:
+      - {{ docker.network }}
+    restart: always
+    command: ["python3", "auto_stats.py"]

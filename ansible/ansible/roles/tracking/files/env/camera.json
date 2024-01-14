@@ -1,0 +1,44 @@
+{
+    "zone": {
+        "Cam1": {
+            "line_intersect": [192,715,1436,624],
+            "box_time": [197, 715, 1436, 624]
+        },
+        "Cam2": {
+            "line_intersect": [1035, 585, 1461, 622],
+            "box_time":  [643, 502, 1452, 605]
+        },
+        "Cam3": {
+            "line_intersect": [711, 640, 1105, 635],
+            "box_time": [711, 640, 1105, 635]
+        },
+        "Cam4": {
+            "line_intersect": [662, 570, 1332, 531],
+            "box_time": [662, 570, 1332, 531]
+        },
+        "Cam5": {
+            "line_intersect": [],
+            "box_time": []
+        },
+        "Cam6": {
+            "line_intersect": [],
+            "box_time": []
+        },
+        "Cam7": {
+            "line_intersect": [],
+            "box_time": []
+        },
+        "Cam8": {
+            "line_intersect": [],
+            "box_time": []
+        },
+        "Cam9": {
+            "line_intersect": [],
+            "box_time": []
+        },
+        "Cam10": {
+            "line_intersect": [],
+            "box_time": []
+        }
+    }
+}

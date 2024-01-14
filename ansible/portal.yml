@@ -1,7 +1,0 @@
-- name: Portal install
-  hosts: backend
-  become: true
-  tasks:
-    - include_role:
-        name: portal
-        tasks_from: install

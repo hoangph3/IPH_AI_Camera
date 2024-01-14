@@ -1,7 +1,0 @@
-- name: Reid install
-  hosts: backend
-  become: true
-  tasks:
-    - include_role:
-        name: reid
-        tasks_from: install

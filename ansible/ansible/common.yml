@@ -1,0 +1,15 @@
+- name: Be prepare
+  hosts: all
+  tasks:
+    - include_role:
+        name: common
+        tasks_from: extend_config
+  become: true
+
+- name: Create docker network
+  hosts: all
+  tasks:
+    - include_role:
+        name: common
+        tasks_from: build_network
+  become: true

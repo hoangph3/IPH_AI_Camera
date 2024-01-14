@@ -1,0 +1,7 @@
+- name: Queue install
+  hosts: jetson
+  become: true
+  tasks:
+    - include_role:
+        name: queue
+        tasks_from: install

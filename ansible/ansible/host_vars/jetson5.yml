@@ -1,0 +1,15 @@
+ansible_host: '10.0.0.235'
+ansible_port: 22
+ansible_user: 'kotora'  # ssh username
+ansible_password: 'ktr123'  # ssh password
+ansible_become_pass: 'ktr123'  # sudo password
+ansible_become_method: sudo
+ansible_become_user: root
+ansible_become: yes
+ansible_python_interpreter: /usr/bin/python3
+camera_rtsp_link:
+  - {"id": "Cam17", "uri": "rtsp://admin:Iph@2024@10.0.0.217:554/ch01.264/0"}
+  - {"id": "Cam18", "uri": "rtsp://admin:Iph@2024@10.0.0.218:554/ch01.264/0"}
+  - {"id": "Cam19", "uri": "rtsp://admin:Iph@2024@10.0.0.219:554/ch01.264/0"}
+  - {"id": "Cam20", "uri": "rtsp://admin:Iph@2024@10.0.0.220:554/ch01.264/0"}
+  - {"id": "Cam21", "uri": "rtsp://admin:Iph@2024@10.0.0.221:554/ch01.264/0"}

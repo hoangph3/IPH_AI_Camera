@@ -1,0 +1,26 @@
+- name: Create {{ reid.compose_dir }} if it's not exists
+  file:
+    path: "{{ reid.compose_dir }}"
+    state: directory
+    recurse: yes
+
+- name: Move {{ reid.compose_dir }}/ templates directory
+  file:
+    path: "{{ reid.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates
+  when: item.state == 'directory'
+
+- name: Move {{ reid.compose_dir }}/ templates file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ reid.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates
+  when: item.state == 'file'
+
+- name: Up reid service
+  shell:
+    cmd: docker-compose down && docker-compose up -d
+    chdir: "{{ reid.compose_dir }}"

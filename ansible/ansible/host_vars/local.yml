@@ -1,0 +1,14 @@
+ansible_host: '127.0.0.1'
+ansible_port: 22
+ansible_user: 'hoang'  # ssh username
+ansible_password: '286'  # ssh password
+ansible_become_pass: '286'  # sudo password
+ansible_become_method: sudo
+ansible_become_user: root
+ansible_become: yes
+ansible_python_interpreter: /usr/bin/python3
+camera_rtsp_link:
+  - {"id": "Cam1", "uri": "rtsp://admin:Iph@2024@10.0.0.201:554/ch01.264/0"}
+  - {"id": "Cam2", "uri": "rtsp://admin:Iph@2024@10.0.0.202:554/ch01.264/0"}
+  - {"id": "Cam3", "uri": "rtsp://admin:Iph@2024@10.0.0.203:554/ch01.264/0"}
+  - {"id": "Cam4", "uri": "rtsp://admin:Iph@2024@10.0.0.204:554/ch01.264/0"}

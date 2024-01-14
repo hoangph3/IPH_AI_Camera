@@ -1,0 +1,87 @@
+remote_install_path: "/opt/mct"
+
+settings:
+  tenant: iph
+  model:
+    detect: 
+      checkpoint: yolov5nu.engine
+      conf: 0.6
+      overlap: 0.3
+      classes: [0]
+    track:
+      track_type: bytetrack
+      track_config: bytetrack.yaml
+    reid:
+      checkpoint: osnet_x1_0_market_iph_wob.pt
+      input_size: [128, 256]
+
+  clustering: 
+    threshold: 0.2
+    linkage: complete
+  matching: 
+    threshold: 0.04
+  metric: "euclidean"
+
+docker:
+  maintainer: kotoracompany
+  version: 0.1.0
+  network: mct-net
+  label: mct
+  log:
+    max_size: 10m
+    max_file: 10
+
+tracking:
+  compose_dir: "{{ remote_install_path }}/tracking"
+  image: "{{ docker.maintainer }}/mct-tracking:{{ docker.version }}"
+  service_name: mct-tracking
+  container_name: mct_tracking
+
+camera:
+  compose_dir: "{{ remote_install_path }}/camera"
+  image: "{{ docker.maintainer }}/mct-tracking:{{ docker.version }}"
+  service_name: mct-camera
+  container_name: mct_camera
+  batch_size: 2
+  max_size: 75
+  time_retry: 1
+
+queue:
+  compose_dir: "{{ remote_install_path }}/queue"
+  redis:
+    image: "redis:7.0.4"
+    service_name: mct_redis
+    container_name: mct_redis
+    port: 6379
+
+database:
+  compose_dir: "{{ remote_install_path }}/database"
+  mongodb:
+    image: "mongo:6.0.1"
+    container_name: mct_mongodb
+    service_name: mct-mongodb
+    username: admin
+    password: P4ssW0rD
+    port: 27017
+  mongoexp:
+    image: "mongo-express:1.0.0-alpha"
+    container_name: mct-mongoexp
+    service_name: mct_mongoexp
+    port: 27018
+  chromadb:
+    image: "ghcr.io/chroma-core/chroma:latest"
+    container_name: mct-chromadb
+    service_name: mct_chromadb
+    port: 8000
+
+reid:
+  compose_dir: "{{ remote_install_path }}/reid"
+  image: "{{ docker.maintainer }}/mct-reid:{{ docker.version }}"
+  service_name: mct-reid
+  container_name: mct_reid
+
+report:
+  compose_dir: "{{ remote_install_path }}/reid"
+  image: "{{ docker.maintainer }}/mct-reid:{{ docker.version }}"
+  service_name: mct-report
+  container_name: mct_report

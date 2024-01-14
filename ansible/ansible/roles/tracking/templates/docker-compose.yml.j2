@@ -1,0 +1,21 @@
+version: "3"
+
+networks:
+  {{ docker.network }}:
+    name: {{ docker.network }}
+    external: true
+
+services:
+  {{ tracking.service_name }}:
+    extends:
+      file: {{ remote_install_path }}/common.yml
+      service: common
+    image: {{ tracking.image }}
+    container_name: {{ tracking.container_name }}
+    volumes: 
+      - ./env:/app/env
+      - ./checkpoint:/app/checkpoint
+    networks:
+      - {{ docker.network }}
+    restart: always
+    runtime: nvidia

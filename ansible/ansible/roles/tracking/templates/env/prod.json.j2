@@ -1,0 +1,33 @@
+{
+    "backend": {
+        "redis": {
+            "uri": "redis://{{ queue.redis.service_name }}:6379/0"
+        },
+        "mongo": {
+            "tracking": {
+                "uri": "mongodb://{{ database.mongodb.username }}:{{ database.mongodb.password }}@{{ hostvars['server'].ansible_host }}:{{ database.mongodb.port }}/admin",
+                "database": "{{ settings.tenant }}",
+                "collection": "tracking"
+            }
+        }
+    },
+    "model": {
+        "detect": {
+            "checkpoint": "./checkpoint/{{ settings.model.detect.checkpoint }}",
+            "conf": {{ settings.model.detect.conf }},
+            "overlap": {{ settings.model.detect.overlap }},
+            "classes": {{ settings.model.detect.classes }}
+        },
+        "track": {
+            "track_type": "{{ settings.model.track.track_type }}",
+            "track_config": "./checkpoint/{{ settings.model.track.track_config }}",
+            "using": true,
+            "save_crop": true
+        },
+        "reid": {
+            "checkpoint": "./checkpoint/{{ settings.model.reid.checkpoint }}",
+            "input_size": {{ settings.model.reid.input_size }},
+            "fp16": false
+        }
+    }
+}
