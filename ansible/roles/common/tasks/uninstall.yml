@@ -1,6 +1,16 @@
+- name: Delete services
+  shell: |
+    docker rm -f $(docker ps -a --filter name="mct_" | awk 'NR>1 {print $1}')
+  ignore_errors: True
+
+- name: Prune everything
+  shell: |
+    docker network prune --force
+    docker volume prune --force
+  ignore_errors: True
 - name: Delete network
   shell: |
-    docker network rm "{{ project.network }}"
+    docker network rm "{{ docker.network }}"
   ignore_errors: True
 
 - name: Backup data
