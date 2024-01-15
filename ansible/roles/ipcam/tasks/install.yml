@@ -4,6 +4,11 @@
     state: directory
     recurse: yes
 
+- name: Move {{ ipcam.compose_dir }}/ files
+  copy:
+    src: "../files/"
+    dest: "{{ ipcam.compose_dir }}"
+
 - name: Move {{ ipcam.compose_dir }}/ templates directory
   file:
     path: "{{ ipcam.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"

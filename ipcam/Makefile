@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-IMAGE ?= kotoracompany/mct-rtsp-stream
+IMAGE ?= kotoracompany/mct-ipcam
 VERSION ?= 0.1.0
 
 echo:

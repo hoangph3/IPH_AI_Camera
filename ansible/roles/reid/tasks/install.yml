@@ -3,7 +3,10 @@
     path: "{{ reid.compose_dir }}"
     state: directory
     recurse: yes
-
+- name: Move {{ reid.compose_dir }}/ files
+  copy:
+    src: "../files/"
+    dest: "{{ reid.compose_dir }}"
 - name: Move {{ reid.compose_dir }}/ templates directory
   file:
     path: "{{ reid.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"

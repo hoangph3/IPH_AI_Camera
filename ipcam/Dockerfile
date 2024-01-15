@@ -1,4 +1,4 @@
-FROM kotoracompany/mct-rtsp-stream:base
+FROM kotoracompany/mct-ipcam:base
 
 WORKDIR /app
 

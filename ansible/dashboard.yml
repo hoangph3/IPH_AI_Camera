@@ -1,0 +1,7 @@
+- name: Dashboard install
+  hosts: server
+  become: true
+  tasks:
+    - include_role:
+        name: dashboard
+        tasks_from: install

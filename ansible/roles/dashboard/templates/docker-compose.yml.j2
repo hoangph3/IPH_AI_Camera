@@ -1,11 +1,10 @@
 version: "3"
 
-
 services:
-  {{ api.service_name }}:
+  {{ dashboard.service_name }}:
     extends:
       file: {{ remote_install_path }}/common.yml
       service: common
-    image: {{ api.image }}
-    container_name: {{ api.container_name }}
+    image: {{ dashboard.image }}
+    container_name: {{ dashboard.container_name }}
     restart: always

@@ -1,10 +1,5 @@
 version: "3"
 
-networks:
-  {{ docker.network }}:
-    name: {{ docker.network }}
-    external: true
-
 services:
   {{ ipcam.service_name }}:
     extends:
@@ -14,6 +9,4 @@ services:
     container_name: {{ ipcam.container_name }}
     volumes: 
       - ./env/prod.json:/app/env/prod.json
-    networks:
-      - {{ docker.network }}
     restart: always

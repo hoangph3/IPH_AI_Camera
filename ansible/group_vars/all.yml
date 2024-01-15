@@ -97,3 +97,9 @@ ipcam:
   image: "{{ docker.maintainer }}/mct-ipcam:{{ docker.version }}"
   service_name: mct-ipcam
   container_name: mct_ipcam
+
+dashboard:
+  compose_dir: "{{ remote_install_path }}/dashboard"
+  image: "{{ docker.maintainer }}/mct-dashboard:{{ docker.version }}"
+  service_name: mct-dashboard
+  container_name: mct_dashboard
