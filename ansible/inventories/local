@@ -2,7 +2,7 @@
 local
 
 [server]
-local
+server
 
 [all]
 local

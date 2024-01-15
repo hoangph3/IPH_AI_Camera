@@ -1,0 +1,19 @@
+version: "3"
+
+networks:
+  {{ docker.network }}:
+    name: {{ docker.network }}
+    external: true
+
+services:
+  {{ ipcam.service_name }}:
+    extends:
+      file: {{ remote_install_path }}/common.yml
+      service: common
+    image: {{ ipcam.image }}
+    container_name: {{ ipcam.container_name }}
+    volumes: 
+      - ./env/prod.json:/app/env/prod.json
+    networks:
+      - {{ docker.network }}
+    restart: always

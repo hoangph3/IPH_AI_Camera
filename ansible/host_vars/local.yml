@@ -1,8 +1,8 @@
-ansible_host: '127.0.0.1'
+ansible_host: '192.168.0.164'
 ansible_port: 22
-ansible_user: 'hoang'  # ssh username
-ansible_password: '286'  # ssh password
-ansible_become_pass: '286'  # sudo password
+ansible_user: 'kotora'  # ssh username
+ansible_password: 'ktr123'  # ssh password
+ansible_become_pass: 'ktr123'  # sudo password
 ansible_become_method: sudo
 ansible_become_user: root
 ansible_become: yes

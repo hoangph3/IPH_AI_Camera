@@ -1,0 +1,17 @@
+version: "3"
+
+networks:
+  {{ docker.network }}:
+    name: {{ docker.network }}
+    external: true
+
+services:
+  {{ api.service_name }}:
+    extends:
+      file: {{ remote_install_path }}/common.yml
+      service: common
+    image: {{ api.image }}
+    container_name: {{ api.container_name }}
+    networks:
+      - {{ docker.network }}
+    restart: always

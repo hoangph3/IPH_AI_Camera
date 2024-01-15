@@ -61,7 +61,7 @@ database:
     container_name: mct_mongodb
     service_name: mct-mongodb
     username: admin
-    password: P4ssW0rD
+    password: password
     port: 27017
   mongoexp:
     image: "mongo-express:1.0.0-alpha"
@@ -85,3 +85,15 @@ report:
   image: "{{ docker.maintainer }}/mct-reid:{{ docker.version }}"
   service_name: mct-report
   container_name: mct_report
+
+api:
+  compose_dir: "{{ remote_install_path }}/api"
+  image: "{{ docker.maintainer }}/mct-api:{{ docker.version }}"
+  service_name: mct-api
+  container_name: mct_api
+
+ipcam:
+  compose_dir: "{{ remote_install_path }}/ipcam"
+  image: "{{ docker.maintainer }}/mct-ipcam:{{ docker.version }}"
+  service_name: mct-ipcam
+  container_name: mct_ipcam

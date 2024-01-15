@@ -1,0 +1,97 @@
+{
+    "camera_url": [
+        "rtsp://admin:Iph@2024@10.0.0.201:554/ch01.264/0",
+        "rtsp://admin:Iph@2024@10.0.0.202:554/ch01.264/0",
+        "rtsp://admin:Iph@2024@10.0.0.203:554/ch01.264/0",
+        "rtsp://admin:Iph@2024@10.0.0.204:554/ch01.264/0",
+        "rtsp://admin:Iph@2024@10.0.0.205:554/ch01.264/0",
+        "rtsp://admin:Iph@2024@10.0.0.206:554/ch01.264/0",
+        "rtsp://admin:Iph@2024@10.0.0.207:554/ch01.264/0",
+        "rtsp://admin:Iph@2024@10.0.0.208:554/ch01.264/0",
+        "rtsp://admin:Iph@2024@10.0.0.209:554/ch01.264/0",
+        "rtsp://admin:Iph@2024@10.0.0.210:554/ch01.264/0",
+        "rtsp://admin:Iph2024Long@10.0.0.211:554/ch01.264",
+        "rtsp://admin:Iph@2024@10.0.0.212:554/ch01.264/0",
+        "rtsp://admin:Iph@2024@10.0.0.213:554/ch01.264/0",
+        "rtsp://admin:Iph2024Long@10.0.0.214:554/ch01.264",
+        "rtsp://admin:Iph2024Long@10.0.0.215:554/ch01.264",
+        "rtsp://admin:Iph2024Long@10.0.0.216:554/ch01.264",
+        "rtsp://admin:Iph2024Long@10.0.0.217:554/ch01.264",
+        "rtsp://admin:Iph2024Long@10.0.0.218:554/ch01.264",
+        "rtsp://admin:Iph2024Long@10.0.0.219:554/ch01.264",
+        "rtsp://admin:Iph2024Long@10.0.0.220:554/ch01.264",
+        "rtsp://admin:Iph2024Long@10.0.0.221:554/ch01.264"
+    ],
+    "camera": [
+        "cam1",
+        "cam2",
+        "cam3",
+        "cam4",
+        "cam5",
+        "cam6",
+        "cam7",
+        "cam8",
+        "cam9",
+        "cam10",
+        "cam11",
+        "cam12",
+        "cam13",
+        "cam14",
+        "cam15",
+        "cam16",
+        "cam17",
+        "cam18",
+        "cam19",
+        "cam20",
+        "cam21"
+    ],
+    "server1": [
+        0,
+        3
+    ],
+    "server2": [
+        3,
+        6
+    ],
+    "server3": [
+        6,
+        9
+    ],
+    "server4": [
+        9,
+        12
+    ],
+    "server5": [
+        12,
+        15
+    ],
+    "server6": [
+        15,
+        18
+    ],
+    "server7": [
+        18,
+        21
+    ],
+    "port1": 3031,
+    "port2": 3032,
+    "port3": 3033,
+    "port4": 3034,
+    "port5": 3035,
+    "port6": 3036,
+    "port7": 3037,
+    "port8": 3038,
+    "port9": 3039,
+    "port10": 3040,
+    "port11": 3041,
+    "port12": 3042,
+    "port13": 3043,
+    "port14": 3044,
+    "port15": 3045,
+    "port16": 3046,
+    "port17": 3047,
+    "port18": 3048,
+    "port19": 3049,
+    "port20": 3050,
+    "port21": 3051
+}

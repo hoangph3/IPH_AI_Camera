@@ -1,0 +1,26 @@
+- name: Create {{ api.compose_dir }} if it's not exists
+  file:
+    path: "{{ api.compose_dir }}"
+    state: directory
+    recurse: yes
+
+- name: Move {{ api.compose_dir }}/ templates directory
+  file:
+    path: "{{ api.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates
+  when: item.state == 'directory'
+
+- name: Move {{ api.compose_dir }}/ templates file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ api.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates
+  when: item.state == 'file'
+
+- name: Up api service
+  shell:
+    cmd: docker-compose down && docker-compose up -d
+    chdir: "{{ api.compose_dir }}"

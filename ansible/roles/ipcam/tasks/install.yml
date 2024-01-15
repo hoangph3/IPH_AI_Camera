@@ -1,0 +1,26 @@
+- name: Create {{ ipcam.compose_dir }} if it's not exists
+  file:
+    path: "{{ ipcam.compose_dir }}"
+    state: directory
+    recurse: yes
+
+- name: Move {{ ipcam.compose_dir }}/ templates directory
+  file:
+    path: "{{ ipcam.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates
+  when: item.state == 'directory'
+
+- name: Move {{ ipcam.compose_dir }}/ templates file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ ipcam.compose_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates
+  when: item.state == 'file'
+
+- name: Up ipcam service
+  shell:
+    cmd: docker-compose down && docker-compose up -d
+    chdir: "{{ ipcam.compose_dir }}"

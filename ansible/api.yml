@@ -1,0 +1,7 @@
+- name: Api install
+  hosts: server
+  become: true
+  tasks:
+    - include_role:
+        name: api
+        tasks_from: install

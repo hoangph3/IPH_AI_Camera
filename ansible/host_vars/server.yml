@@ -1,6 +1,6 @@
-ansible_host: '10.0.0.230'
+ansible_host: '192.168.0.149'
 ansible_port: 22
-ansible_user: 'kotora'  # ssh username
+ansible_user: 'dev-vm'  # ssh username
 ansible_password: 'ktr123'  # ssh password
 ansible_become_pass: 'ktr123'  # sudo password
 ansible_become_method: sudo
