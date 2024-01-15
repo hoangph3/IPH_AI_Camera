@@ -39,7 +39,7 @@ tracking:
 
 camera:
   compose_dir: "{{ remote_install_path }}/camera"
-  image: "{{ docker.maintainer }}/mct-tracking:{{ docker.version }}"
+  image: "{{ docker.maintainer }}/mct-camera:{{ docker.version }}"
   service_name: mct-camera
   container_name: mct_camera
   batch_size: 2

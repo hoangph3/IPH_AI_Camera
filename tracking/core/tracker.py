@@ -7,7 +7,7 @@ import numpy as np
 
 from collections import defaultdict
 from core.reid import ReIDMultiBackend
-from core.intersection import box_line_intersection, halve_bbox_y
+from core.intersection import box_line_intersection, halve_bbox_y, get_centroid, calculate_distance, calculate_perpendicular_point
 from datalayer.mongo import MongoBackend
 from utility import processing, handler, dataio
 from utility.hparams import HParams
@@ -148,6 +148,16 @@ class Tracker(Detection):
                             continue
 
                         object_ids_per_tracker[key][object_id] = True
+                        if key == 'Cam5' or key == 'Cam8':
+                            bbox_centroid = get_centroid(xyxy)
+                            perpendicular_point = calculate_perpendicular_point(bbox_centroid, line_intersect)
+                            distance_to_perpendicular = calculate_distance(bbox_centroid, perpendicular_point)
+                            _, y1, _, y2 = xyxy
+                            bbox_height = y2-y1
+                            bbox_height_percentage = distance_to_perpendicular / bbox_height
+                            if bbox_height_percentage <= 0.25:
+                                #toggle = 0
+                                continue
                         track_events.append(event)
 
                 if len(track_events):

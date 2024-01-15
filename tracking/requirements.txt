@@ -6,4 +6,4 @@ redis
 tqdm
 requests
 pymongo
-numpy
+numpy==1.23.1

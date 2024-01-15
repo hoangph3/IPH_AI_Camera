@@ -1,3 +1,5 @@
+import math
+
 def on_segment(p, q, r):
     return (q[0] <= max(p[0], r[0]) and q[0] >= min(p[0], r[0]) and
             q[1] <= max(p[1], r[1]) and q[1] >= min(p[1], r[1]))
@@ -82,8 +84,20 @@ def get_centroid(bbox):
     centroid_y = (y1 + y2) / 2
     return centroid_x, centroid_y
 
+def calculate_distance(point1, point2):
+    x1, y1 = point1
+    x2, y2 = point2
+    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
-def is_centroid_in_lower_half(image_height, bbox):
-    _, _, _, y2 = bbox
-    centroid_x, centroid_y = get_centroid(bbox)
-    return centroid_y > image_height / 2
+def calculate_perpendicular_point(centroid, line):
+    x_c, y_c = centroid
+    x1, y1, x2, y2 = line
+
+    m_line = (y2 - y1) / (x2 - x1) if (x2 - x1) != 0 else float('inf')
+
+    m_perpendicular = -1 / m_line if m_line != 0 else float('inf')
+
+    x_intersect = (m_line * x1 - m_perpendicular * x_c + y_c - y1) / (m_line - m_perpendicular)
+    y_intersect = m_perpendicular * (x_intersect - x_c) + y_c
+
+    return x_intersect, y_intersect
