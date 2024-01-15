@@ -1,9 +1,17 @@
 [jetson]
-local
+jetson1
+jetson2
+jetson3
+jetson4
+jetson5
 
 [all]
 server
-local
+jetson1
+jetson2
+jetson3
+jetson4
+jetson5
 
-[backend]
+[server]
 server
