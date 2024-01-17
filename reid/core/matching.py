@@ -78,6 +78,8 @@ class Matching:
             tracking_dt = self.database.get_history_tracking_data(
                 time_from=last_reid_time, time_to=handler.get_time()
             )
+            if len(tracking_dt)<=self.config.min_events:
+                continue
             logger.info("Tracking events: {}".format(len(tracking_dt)))
 
             features = np.array([doc['feature_embeddings'] for doc in tracking_dt])
