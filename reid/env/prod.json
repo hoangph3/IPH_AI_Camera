@@ -41,5 +41,6 @@
     "metric": "euclidean",
     "interval": 5,
     "batch_time": 1800,
-    "batch_size": 100000
+    "batch_size": 100000,
+    "min_events": 100
 }
