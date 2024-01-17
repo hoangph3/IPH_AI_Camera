@@ -13,7 +13,7 @@ class Database:
         if time_from is not None:
             _filter['timestamp']["$gte"] = time_from
         if time_to is not None:
-            _filter['timestamp']["$lte"] = time_to
+            _filter['timestamp']["$lt"] = time_to
 
         records = self.mongo_tracking.get(
             db_name=self.config.backend.mongo.tracking.database,
@@ -45,7 +45,7 @@ class Database:
         if time_from is not None:
             _filter['query_time']["$gte"] = time_from
         if time_to is not None:
-            _filter['query_time']["$lte"] = time_to
+            _filter['query_time']["$lt"] = time_to
 
         records = self.mongo_reid.get(
             db_name=self.config.backend.mongo.reid.database,
