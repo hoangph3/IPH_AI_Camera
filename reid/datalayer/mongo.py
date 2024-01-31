@@ -57,8 +57,14 @@ class MongoBackend(GenericBackend):
         if "_id" not in data:
             raise ObjectIdNotFound(collection_name, None)
 
-        result = collection.delete_one({"_id": data["_id"]})
-        if not result:
-            raise ObjectIdNotFound(collection_name, data["_id"])
+        document_id = data["_id"]
+        if not isinstance(document_id, ObjectId):
+            document_id = ObjectId(document_id)
+        result = collection.delete_one({"_id": document_id})
+        print(f"Delete result: {result}")
 
-        return str(data["_id"])
+        if result.deleted_count == 0:
+            raise ObjectIdNotFound(collection_name, document_id)
+
+        return str(document_id)
+
