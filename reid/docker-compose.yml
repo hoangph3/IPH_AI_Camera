@@ -6,47 +6,47 @@ networks:
     external: true
 
 services:
-  mct-reid:
-    image: kotoracompany/mct-reid:0.1.0
-    container_name: mct_reid
-    volumes: 
-      - ./env:/app/env
-    networks:
-      - mct-net
-    restart: always
-    environment:
-      - TZ=Asia/Ho_Chi_Minh
+  # mct-reid:
+  #   image: kotoracompany/mct-reid:0.1.0
+  #   container_name: mct_reid
+  #   volumes: 
+  #     - ./env:/app/env
+  #   networks:
+  #     - mct-net
+  #   restart: always
+  #   environment:
+  #     - TZ=Asia/Ho_Chi_Minh
 
-  mct-report:
-    image: kotoracompany/mct-reid:0.1.0
-    container_name: mct_report
-    volumes: 
-      - ./env:/app/env
-    networks:
-      - mct-net
-    restart: always
-    environment:
-      - TZ=Asia/Ho_Chi_Minh
-    command: ["python3", "auto_stats.py"]
+  # mct-report:
+  #   image: kotoracompany/mct-reid:0.1.0
+  #   container_name: mct_report
+  #   volumes: 
+  #     - ./env:/app/env
+  #   networks:
+  #     - mct-net
+  #   restart: always
+  #   environment:
+  #     - TZ=Asia/Ho_Chi_Minh
+  #   command: ["python3", "auto_stats.py"]
 
-  mct-chroma:
-    container_name: mct_chroma
-    image: ghcr.io/chroma-core/chroma:latest
-    restart: always
-    # volumes:
-    #   - ./volumes/chromadb:/chroma/chroma
-    command: uvicorn chromadb.app:app --reload --workers 4 --host 0.0.0.0 --port 8000 --log-config chromadb/log_config.yml
-    environment:
-      - IS_PERSISTENT=TRUE
-      - CHROMA_SERVER_AUTH_PROVIDER=${CHROMA_SERVER_AUTH_PROVIDER}
-      - CHROMA_SERVER_AUTH_CREDENTIALS_FILE=${CHROMA_SERVER_AUTH_CREDENTIALS_FILE}
-      - CHROMA_SERVER_AUTH_CREDENTIALS=${CHROMA_SERVER_AUTH_CREDENTIALS}
-      - CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=${CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER}
-      - PERSIST_DIRECTORY=${PERSIST_DIRECTORY:-/chroma/chroma}
-    ports:
-      - '8000:8000'
-    networks:
-      - mct-net
+  # mct-chroma:
+  #   container_name: mct_chroma
+  #   image: ghcr.io/chroma-core/chroma:latest
+  #   restart: always
+  #   # volumes:
+  #   #   - ./volumes/chromadb:/chroma/chroma
+  #   command: uvicorn chromadb.app:app --reload --workers 4 --host 0.0.0.0 --port 8000 --log-config chromadb/log_config.yml
+  #   environment:
+  #     - IS_PERSISTENT=TRUE
+  #     - CHROMA_SERVER_AUTH_PROVIDER=${CHROMA_SERVER_AUTH_PROVIDER}
+  #     - CHROMA_SERVER_AUTH_CREDENTIALS_FILE=${CHROMA_SERVER_AUTH_CREDENTIALS_FILE}
+  #     - CHROMA_SERVER_AUTH_CREDENTIALS=${CHROMA_SERVER_AUTH_CREDENTIALS}
+  #     - CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER=${CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER}
+  #     - PERSIST_DIRECTORY=${PERSIST_DIRECTORY:-/chroma/chroma}
+  #   ports:
+  #     - '8000:8000'
+  #   networks:
+  #     - mct-net
 
   mct-mongodb:
     image: mongo:6.0.1
@@ -88,7 +88,7 @@ services:
 
   mct-prune_reid:
     image: kotoracompany/mct-reid:0.1.0
-    container_name: mct_prune_tracking
+    container_name: mct_prune_reid
     volumes: 
       - ./env:/app/env
     networks:

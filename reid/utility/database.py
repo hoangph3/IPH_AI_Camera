@@ -126,7 +126,7 @@ class Database:
             collection_name=self.config.backend.mongo.reid.collection,
             _filter=None
         ).sort(
-            [('timestamp', 1)]  # Sort in ascending order to get the first document
+            [('query_time', 1)]  # Sort in ascending order to get the first document
         ).limit(
             1
         )

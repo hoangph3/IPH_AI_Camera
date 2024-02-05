@@ -43,5 +43,5 @@
     "batch_time": 1800,
     "batch_size": 100000,
     "min_events": 100,
-    "period": 365
+    "period": 1
 }

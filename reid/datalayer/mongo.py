@@ -1,3 +1,4 @@
+from bson import ObjectId
 import pymongo
 
 from . import GenericBackend
