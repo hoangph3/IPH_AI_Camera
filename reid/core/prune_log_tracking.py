@@ -1,4 +1,4 @@
-# core/prune_log.py
+# core/prune_log_tracking.py
 
 from datetime import timedelta
 from utility.handler import get_time, time2datetime, datetime2time

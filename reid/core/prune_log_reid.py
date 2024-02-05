@@ -1,4 +1,4 @@
-# core/prune_log.py
+# core/prune_log_reid.py
 
 from datetime import timedelta
 from utility.handler import get_time, time2datetime, datetime2time
@@ -20,7 +20,7 @@ class PruneLogger:
             start_time=get_time()
             first_document = self.database.get_first_reid_data()
             if first_document:
-                first_timestamp = first_document.get('timestamp')
+                first_timestamp = first_document.get('query_time')
                 first_id =first_document.get('_id')
                 
                 

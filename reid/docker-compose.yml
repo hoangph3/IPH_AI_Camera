@@ -74,3 +74,26 @@ services:
       - ME_CONFIG_MONGODB_SERVER=mct-mongodb
     networks:
       - mct-net
+  mct-prune-tracking:
+    image: kotoracompany/mct-reid:0.1.0
+    container_name: mct_prune_tracking
+    volumes: 
+      - ./env:/app/env
+    networks:
+      - mct-net
+    restart: always
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    command: ["python3", "auto_prune_tracking.py"]
+
+  mct-prune_reid:
+    image: kotoracompany/mct-reid:0.1.0
+    container_name: mct_prune_tracking
+    volumes: 
+      - ./env:/app/env
+    networks:
+      - mct-net
+    restart: always
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    command: ["python3", "auto_prune_reid.py"]
