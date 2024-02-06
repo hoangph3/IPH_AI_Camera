@@ -1,4 +1,5 @@
 from bson import ObjectId
+from loguru import logger
 import pymongo
 
 from . import GenericBackend
@@ -68,4 +69,3 @@ class MongoBackend(GenericBackend):
             raise ObjectIdNotFound(collection_name, document_id)
 
         return str(document_id)
-
