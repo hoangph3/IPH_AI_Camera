@@ -83,7 +83,16 @@ class Report:
                         )
                         
                         if not len(reid_batch_data):
-                            continue
+                            # continue
+                            
+                            doc = {
+                                'start_time': datetime_from,
+                                'end_time': datetime_to,
+                                'camera_counts': [],
+                                'reid_counts': [],
+                                'count': 0
+                            }
+                            report_data.append(doc)
 
                         reid_df = pd.DataFrame(reid_batch_data)
                         tracking_df = pd.DataFrame(tracking_batch_data)
