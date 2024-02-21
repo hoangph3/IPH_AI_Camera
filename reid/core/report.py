@@ -63,6 +63,7 @@ class Report:
                     batch_time=batch_time
                 )
 
+                time_boxes.pop()
                 report_data = []
                 for time_box in time_boxes:
                         datetime_from, datetime_to = time_box
@@ -88,11 +89,18 @@ class Report:
                             doc = {
                                 'start_time': datetime_from,
                                 'end_time': datetime_to,
-                                'camera_counts': [],
-                                'reid_counts': [],
+                                'camera_counts': {},
+                                'reid_counts': {},
                                 'count': 0
                             }
+
+                            logger.info(
+                            "Report from: {} to: {}: {}".format(
+                                datetime_from, datetime_to, doc
+                                )
+                            )
                             report_data.append(doc)
+                            continue
 
                         reid_df = pd.DataFrame(reid_batch_data)
                         tracking_df = pd.DataFrame(tracking_batch_data)
