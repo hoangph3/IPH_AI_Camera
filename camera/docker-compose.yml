@@ -16,6 +16,11 @@ services:
     ports:
       - 9081:9081
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
     
   mct-redis:
     image: redis:7.0.4
@@ -25,3 +30,8 @@ services:
     ports:
       - 6379:6379
     restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

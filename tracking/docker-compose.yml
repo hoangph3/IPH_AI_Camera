@@ -16,4 +16,9 @@ services:
     volumes:
       - ./env:/app/env
       - ./checkpoint:/app/checkpoint
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
   
