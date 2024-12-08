@@ -39,7 +39,29 @@ var change = false;
 
 let isProcessing = false;
 
-app.get(`/cam`, (req, res) => {
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const attemptCapture = async (url, retries = 3, delay = 1000) => {
+  try {
+    let cap = new cv2.VideoCapture(url);
+    if (!cap.isOpened()) {
+      throw new Error("Failed to open video capture");
+    }
+    return cap;
+  } catch (error) {
+    console.log(`Error opening video capture: ${error.message}`);
+    if (retries > 0) {
+      console.log(`Retrying in ${delay / 1000} seconds... (${retries} attempts left)`);
+      await sleep(delay); // Wait before retrying
+      return attemptCapture(url, retries - 1, delay);
+    } else {
+      console.log("All retries failed.");
+      return null;
+    }
+  }
+};
+
+app.get(`/cam`, async (req, res) => {
   try {
     if (isProcessing) {
       res.sendFile(path.join(__dirname, `index.html`));
@@ -48,32 +70,39 @@ app.get(`/cam`, (req, res) => {
 
     isProcessing = true;
 
-    var curIndex = camera.indexOf(curId);
-    var cap = new cv2.VideoCapture(camera_url[curIndex]);
+    const curIndex = camera.indexOf(curId);
+    const url = camera_url[curIndex];
+    let cap = await attemptCapture(url);
 
-    const captureFrame = () => {
+    if (!cap) {
+      isProcessing = false;
+      res.status(500).send("Failed to open video capture.");
+      return;
+    }
+
+    const captureFrame = async () => {
       if (change === true) {
         console.log("change");
         cap.release();
-        execSync("sleep 0.1");
-        var curIndex = camera.indexOf(curId);
-        cap = new cv2.VideoCapture(camera_url[curIndex]);
+        await sleep(100); // Short delay for releasing resources
+        const curIndex = camera.indexOf(curId);
+        const url = camera_url[curIndex];
+        cap = await attemptCapture(url);
         change = false;
       }
 
-      var frame = cap.read();
+      const frame = cap.read();
       if (frame.empty) {
         console.log("No frame captured!");
         try {
           cap.reset();
           console.log("Reset camera success!");
-          frame = cap.read();
         } catch (error) {
           console.log("Reset error:", error);
         }
       }
 
-      let image = cv2.imencode(".jpg", frame).toString("base64");
+      const image = cv2.imencode(".jpg", frame).toString("base64");
       io.emit(`image`, image);
 
       if (isProcessing) {
