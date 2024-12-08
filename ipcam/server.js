@@ -39,6 +39,11 @@ var change = false;
 
 let isProcessing = false;
 
+const fs = require("fs");
+
+// Load a placeholder error image (base64 encoded)
+const errorImage = fs.readFileSync("./assets/error.jpg").toString("base64");
+
 const attemptCapture = async (url, retries = 5, delay = 1000) => {
   try {
     console.log(`Attempting to connect to: ${url}`);
@@ -82,13 +87,6 @@ app.get(`/cam`, async (req, res) => {
     const url = camera_url[curIndex];
     let cap = await attemptCapture(url);
 
-    if (!cap) {
-      console.error("Failed to initialize capture after retries.");
-      isProcessing = false;
-      res.status(500).send("Failed to initialize capture after retries.");
-      return;
-    }
-
     const captureFrame = async () => {
       if (change === true) {
         console.log("Camera change requested.");
@@ -98,34 +96,27 @@ app.get(`/cam`, async (req, res) => {
         const url = camera_url[curIndex];
         cap = await attemptCapture(url);
 
-        if (!cap) {
-          console.error("Failed to reinitialize capture after camera change.");
-          isProcessing = false;
-          return; // Stop execution if reinitialization fails
-        }
-
         change = false;
       }
 
+      // If `cap` is null, emit the error image
       if (!cap) {
-        console.error("Capture is null, stopping frame capture.");
-        isProcessing = false;
+        console.log("Emitting error image due to capture failure.");
+        io.emit("image", errorImage);
+        setTimeout(captureFrame, 1000 / FramePerSec); // Retry in the next frame
         return;
       }
 
       const frame = cap.read();
       if (frame.empty) {
-        console.log("No frame captured!");
-        try {
-          cap.reset();
-          console.log("Camera reset successful.");
-        } catch (error) {
-          console.log("Reset error:", error.message);
-        }
+        console.log("No frame captured! Emitting error image.");
+        io.emit("image", errorImage);
+        setTimeout(captureFrame, 1000 / FramePerSec); // Retry in the next frame
+        return;
       }
 
       const image = cv2.imencode(".jpg", frame).toString("base64");
-      io.emit(`image`, image);
+      io.emit("image", image);
 
       if (isProcessing) {
         setTimeout(captureFrame, 1000 / FramePerSec);
