@@ -39,28 +39,35 @@ var change = false;
 
 let isProcessing = false;
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const attemptCapture = async (url, retries = 3, delay = 1000) => {
+const attemptCapture = async (url, retries = 5, delay = 1000) => {
   try {
+    console.log(`Attempting to connect to: ${url}`);
     let cap = new cv2.VideoCapture(url);
+
+    // Test if the capture object is valid by reading a frame
     let frame = cap.read();
     if (frame.empty) {
       throw new Error("Failed to read initial frame. Camera may not be accessible.");
     }
-    return cap;
+
+    console.log("VideoCapture successfully opened.");
+    return cap; // Successfully created capture
   } catch (error) {
-    console.log(`Error opening video capture: ${error.message}`);
+    const systemError = error.message || "Unknown error occurred";
+    console.log(`Error opening video capture: ${systemError}`);
+
     if (retries > 0) {
       console.log(`Retrying in ${delay / 1000} seconds... (${retries} attempts left)`);
       await sleep(delay); // Wait before retrying
       return attemptCapture(url, retries - 1, delay);
     } else {
-      console.log("All retries failed.");
-      return null;
+      console.error(`All retries failed. Last error: ${systemError}`);
+      return null; // Explicitly return null after all retries
     }
   }
 };
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 app.get(`/cam`, async (req, res) => {
   try {
@@ -76,20 +83,34 @@ app.get(`/cam`, async (req, res) => {
     let cap = await attemptCapture(url);
 
     if (!cap) {
+      console.error("Failed to initialize capture after retries.");
       isProcessing = false;
-      res.status(500).send("Failed to open video capture.");
+      res.status(500).send("Failed to initialize capture after retries.");
       return;
     }
 
     const captureFrame = async () => {
       if (change === true) {
-        console.log("change");
+        console.log("Camera change requested.");
         cap.release();
         await sleep(100); // Short delay for releasing resources
         const curIndex = camera.indexOf(curId);
         const url = camera_url[curIndex];
         cap = await attemptCapture(url);
+
+        if (!cap) {
+          console.error("Failed to reinitialize capture after camera change.");
+          isProcessing = false;
+          return; // Stop execution if reinitialization fails
+        }
+
         change = false;
+      }
+
+      if (!cap) {
+        console.error("Capture is null, stopping frame capture.");
+        isProcessing = false;
+        return;
       }
 
       const frame = cap.read();
@@ -97,9 +118,9 @@ app.get(`/cam`, async (req, res) => {
         console.log("No frame captured!");
         try {
           cap.reset();
-          console.log("Reset camera success!");
+          console.log("Camera reset successful.");
         } catch (error) {
-          console.log("Reset error:", error);
+          console.log("Reset error:", error.message);
         }
       }
 
@@ -115,7 +136,8 @@ app.get(`/cam`, async (req, res) => {
 
     res.sendFile(path.join(__dirname, `index.html`));
   } catch (error) {
-    console.log(error);
+    console.log("Error in GET /cam route:", error.message);
+    res.status(500).send(`Failed to start camera stream. Error: ${error.message}`);
     isProcessing = false;
   }
 });
