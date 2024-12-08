@@ -39,8 +39,6 @@ var change = false;
 
 let isProcessing = false;
 
-const fs = require("fs");
-
 // Load a placeholder error image (base64 encoded)
 const errorImage = fs.readFileSync("./assets/error.jpg").toString("base64");
 
