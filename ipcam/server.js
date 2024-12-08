@@ -44,8 +44,9 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const attemptCapture = async (url, retries = 3, delay = 1000) => {
   try {
     let cap = new cv2.VideoCapture(url);
-    if (!cap.isOpened()) {
-      throw new Error("Failed to open video capture");
+    let frame = cap.read();
+    if (frame.empty) {
+      throw new Error("Failed to read initial frame. Camera may not be accessible.");
     }
     return cap;
   } catch (error) {
