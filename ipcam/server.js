@@ -40,9 +40,9 @@ var change = false;
 let isProcessing = false;
 
 // Load a placeholder error image (base64 encoded)
-const errorImage = fs.readFileSync("./assets/error.jpg").toString("base64");
+const errorImage = fs.readFileSync("./assets/error_cam.jpg").toString("base64");
 
-const attemptCapture = async (url, retries = 5, delay = 1000) => {
+const attemptCapture = async (url, retries = 3, delay = 500) => {
   try {
     console.log(`Attempting to connect to: ${url}`);
     let cap = new cv2.VideoCapture(url);
