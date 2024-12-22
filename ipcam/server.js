@@ -42,7 +42,7 @@ let isProcessing = false;
 // Load a placeholder error image (base64 encoded)
 const errorImage = fs.readFileSync("./assets/error.jpg").toString("base64");
 
-const attemptCapture = async (url, retries = 3, delay = 1000) => {
+const attemptCapture = async (url, retries = 5, delay = 1000) => {
   try {
     console.log(`Attempting to connect to: ${url}`);
     let cap = new cv2.VideoCapture(url);
@@ -88,7 +88,9 @@ app.get(`/cam`, async (req, res) => {
     const captureFrame = async () => {
       if (change === true) {
         console.log("Camera change requested.");
-        cap.release();
+        if (cap) {
+          cap.release(); // Safely release only if `cap` is not null
+        }
         await sleep(100); // Short delay for releasing resources
         const curIndex = camera.indexOf(curId);
         const url = camera_url[curIndex];
@@ -97,7 +99,7 @@ app.get(`/cam`, async (req, res) => {
         change = false;
       }
 
-      // If `cap` is null, emit the error image
+      // Emit error image if `cap` is null
       if (!cap) {
         console.log("Emitting error image due to capture failure.");
         io.emit("image", errorImage);
