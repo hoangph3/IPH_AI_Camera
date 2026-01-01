@@ -6,4 +6,3 @@ services:
     container_name: mct_dashboard
     restart: always
     network_mode: host
-    

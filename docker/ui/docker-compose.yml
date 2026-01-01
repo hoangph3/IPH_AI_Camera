@@ -1,0 +1,18 @@
+services:
+  mct-dashboard:
+    image: kotoracompany/mct-dashboard:0.1.0
+    container_name: mct_dashboard
+    restart: always
+    network_mode: host
+
+  mct-api:
+    image: kotoracompany/mct-api:0.1.0
+    container_name: mct_api
+    restart: always
+    network_mode: host
+
+  mct-ipcam:
+    image: kotoracompany/mct-ipcam:0.1.1 #hotfix
+    container_name: mct_ipcam
+    restart: always
+    network_mode: host
