@@ -4,15 +4,20 @@ services:
     container_name: mct_dashboard
     restart: always
     network_mode: host
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
 
   mct-api:
     image: kotoracompany/mct-api:0.1.0
     container_name: mct_api
     restart: always
     network_mode: host
-
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
   mct-ipcam:
     image: kotoracompany/mct-ipcam:0.1.1 #hotfix
     container_name: mct_ipcam
     restart: always
     network_mode: host
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
