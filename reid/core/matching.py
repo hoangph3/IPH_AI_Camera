@@ -85,7 +85,7 @@ class Matching:
             features = np.array([doc['feature_embeddings'] for doc in tracking_dt])
             cam_ids = np.array([doc['camera_id'] for doc in tracking_dt])
             timestamps = np.array([doc['timestamp'] for doc in tracking_dt])
-            box_images = np.array([doc['object_image'] for doc in tracking_dt])
+            # box_images = np.array([doc['object_image'] for doc in tracking_dt])
 
             # TODO: Clustering
             clustering_params = {
@@ -110,7 +110,7 @@ class Matching:
                 query = features[cluster_indices]
                 cam_id = cam_ids[cluster_indices]
                 timestamp = timestamps[cluster_indices]
-                box_image = box_images[cluster_indices]
+                # box_image = box_images[cluster_indices]
 
                 # TODO: Search by query = (num_query, dim)
                 search_query = self.chroma_client.search(
@@ -175,7 +175,8 @@ class Matching:
                         "query_time": int(timestamp[qidx]),
                         "global_id": global_id,
                         'dist': dist,
-                        "box_img": box_image[qidx]
+                        'box_img': None
+                        # "box_img": box_image[qidx]
                     }
                     reid_events.append(event)
 

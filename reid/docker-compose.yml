@@ -1,10 +1,3 @@
-version: "3"
-
-networks:
-  mct-net:
-    name: mct-net
-    external: true
-
 services:
   mct-reid:
     image: kotoracompany/mct-reid:0.1.2
@@ -17,9 +10,9 @@ services:
     environment:
       - TZ=Asia/Ho_Chi_Minh
 
-  mct-report:
+  mct-cron-report:
     image: kotoracompany/mct-reid:0.1.2
-    container_name: mct_report
+    container_name: mct_cron_report
     volumes:
       - ./env:/app/env
     networks:
@@ -29,9 +22,9 @@ services:
       - TZ=Asia/Ho_Chi_Minh
     command: ["python3", "auto_stats.py"]
 
-  mct-prune-log:
+  mct-cron-log:
     image: kotoracompany/mct-reid:0.1.2
-    container_name: mct_prune_log
+    container_name: mct_cron_log
     volumes:
       - ./env:/app/env
     networks:
@@ -40,3 +33,8 @@ services:
     environment:
       - TZ=Asia/Ho_Chi_Minh
     command: ["python3", "auto_prune.py"]
+
+networks:
+  mct-net:
+    name: mct-net
+    external: true
