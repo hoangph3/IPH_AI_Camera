@@ -43,6 +43,7 @@
     "batch_time": 1800,
     "batch_size": 100000,
     "min_events": 100,
-    "period": 1,
+    "period": 365,
     "prune_batch_size": 100
+    
 }

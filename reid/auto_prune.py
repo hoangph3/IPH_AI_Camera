@@ -1,6 +1,8 @@
+import time
 from core.prune_log import PruneLogger
 from utility.hparams import get_hparams_from_file
 import threading
+
 
 if __name__ == "__main__":
     prune_config = get_hparams_from_file("./env/prod.json")
@@ -12,11 +14,24 @@ if __name__ == "__main__":
     # Create threads for simultaneous execution
     tracking_thread = threading.Thread(target=tracking_pruner.run)
     reid_thread = threading.Thread(target=reid_pruner.run)
-
+    
     # Start the threads
-    tracking_thread.start()
     reid_thread.start()
+    tracking_thread.start()
+   
+# # Simulate running for a while
+#     time.sleep(1)  # Let the threads run for 10 seconds
 
-    # Wait for both threads to finish
-    tracking_thread.join()
-    reid_thread.join()
+#     # Stop the threads
+#     tracking_pruner.stop()
+#     reid_pruner.stop()
+
+    # # Wait for both threads to finish
+    # tracking_thread.join()
+    # reid_thread.join()
+    
+    # print("Both threads have finished.")
+    
+    # # Wait for both threads to finish
+    # tracking_thread.join()
+    # reid_thread.join()

@@ -21,11 +21,12 @@ class PruneLogger:
         while True:
             start_time = get_time()
             first_document = self.get_first_document()
+            logger.info(self.data_type)
             if first_document:
                 first_timestamp_key = 'timestamp' if self.data_type == 'tracking' else 'query_time'
                 first_timestamp = first_document.get(first_timestamp_key)
                 first_id = first_document.get('_id')
-
+                # logger.info(first_timestamp)
                 prune_timedelta = timedelta(days=self.prune_period)
                 prune_timestamp = datetime2time(time2datetime(get_time()) - prune_timedelta)
 
@@ -39,6 +40,8 @@ class PruneLogger:
             process_time = end_time - start_time
             logger.info(f"Time tooks to delete {process_time} ms")
             logger.info("Waiting for the next iteration.")
+            time.sleep(1)
+            
 
     def get_first_document(self):
         if self.data_type == 'tracking':
