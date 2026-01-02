@@ -46,7 +46,7 @@ if __name__ == "__main__":
     hps = get_hparams_from_file(config_path)
 
     uvicorn.run(
-        "app:app",
+        "main:app",
         host='0.0.0.0', port=hps.app.port,
         log_level="info", reload=True
     )

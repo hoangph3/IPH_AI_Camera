@@ -10,17 +10,12 @@ services:
     image: kotoracompany/mct-camera:0.1.0
     container_name: mct_camera
     volumes: 
-      - ./env/prod.json:/app/env/prod.json
+      - ./env/prod.json:/app/env/config.json
     networks:
       - mct-net
     ports:
       - 9081:9081
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 10m
-        max-file: "3"
     
   mct-redis:
     image: redis:7.0.4
@@ -30,8 +25,3 @@ services:
     ports:
       - 6379:6379
     restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: 10m
-        max-file: "3"
