@@ -7,9 +7,9 @@ def create_worker_process(process_name, execute_fn, params=None):
     while controller.get_status(process_name=process_name):
         pass
     controller.kill_process(process_name=process_name, force=True)
-    controller.add_process(process_name=process_name,
-                           execute_fn=execute_fn,
-                           params=params)
+    controller.add_process(
+        process_name=process_name, execute_fn=execute_fn, params=params
+    )
     print("Create worker process: {}".format(process_name))
     return
 
@@ -34,9 +34,13 @@ class PController(object):
         if process_name in self.processes:
             raise Exception("Process is Duplicated")
         if params:
-            self.processes[process_name] = mtp.Process(target=execute_fn, args=params, name=process_name)
+            self.processes[process_name] = mtp.Process(
+                target=execute_fn, args=params, name=process_name
+            )
         else:
-            self.processes[process_name] = mtp.Process(target=execute_fn, name=process_name)
+            self.processes[process_name] = mtp.Process(
+                target=execute_fn, name=process_name
+            )
         self.processes[process_name].start()
 
     def update_process(self, process_name: str, execute_fn, params=None):

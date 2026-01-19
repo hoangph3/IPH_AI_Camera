@@ -20,13 +20,13 @@ def get_hparams_from_file(config_path, as_dict=False):
     return hparams
 
 
-class HParams():
+class HParams:
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
             if type(v) == dict:
                 v = HParams(**v)
             self[k] = v
-        
+
     def keys(self):
         return self.__dict__.keys()
 

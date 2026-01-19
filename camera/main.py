@@ -43,10 +43,9 @@ async def redoc_html():
 
 if __name__ == "__main__":
     from utility.hparams import get_hparams_from_file, config_path
+
     hps = get_hparams_from_file(config_path)
 
     uvicorn.run(
-        "main:app",
-        host='0.0.0.0', port=hps.app.port,
-        log_level="info", reload=True
+        "main:app", host="0.0.0.0", port=hps.app.port, log_level="info", reload=True
     )

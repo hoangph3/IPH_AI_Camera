@@ -14,6 +14,7 @@ def check_cam_list_structure():
     else:
         return None
 
+
 # Check the structure of cam_list
 structure = check_cam_list_structure()
 

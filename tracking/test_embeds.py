@@ -23,35 +23,27 @@ def get_plot(encodings, ids, top_k=20, metric="euclidean", random_state=42):
 
         top_k_values = dist[sorted_indices[:top_k]]
         top_k_indices = sorted_indices[:top_k]
-        
+
         print("anchor:", _id)
         print("neighbor:", np.array(ids)[top_k_indices])
         print("dist:", top_k_values.round(6))
         print()
 
     # Plot
-    plt.figure(figsize=(15, 10), facecolor='azure')
+    plt.figure(figsize=(15, 10), facecolor="azure")
     for label in np.unique(ids):
-        tmp = embeddings_2d[ids==label]
+        tmp = embeddings_2d[ids == label]
         c_x = np.sum([x for x, y in tmp]) / len(tmp)
         c_y = np.sum([y for x, y in tmp]) / len(tmp)
-        plt.scatter(tmp[:,0], tmp[:,1], label=label)
+        plt.scatter(tmp[:, 0], tmp[:, 1], label=label)
         plt.annotate(label, (c_x, c_y))
     plt.legend()
     plt.show()
 
 
-def get_embeds(
-    data_loader: DataLoader,
-    checkpoint_path=None,
-    device=None,
-    num_ids=10
-):
+def get_embeds(data_loader: DataLoader, checkpoint_path=None, device=None, num_ids=10):
     # Model
-    reid_backend = ReIDMultiBackend(
-        weights=checkpoint_path,
-        device=device, fp16=False
-    )
+    reid_backend = ReIDMultiBackend(weights=checkpoint_path, device=device, fp16=False)
     model = reid_backend.model
     model.eval()
 
@@ -82,15 +74,28 @@ if __name__ == "__main__":
     random_state = 42
 
     # k below is num images, k=-1 is all images
-    dataset = ReIDDataset(data_dir=data_dir, target_size=target_size, random_state=random_state, k=-1)
+    dataset = ReIDDataset(
+        data_dir=data_dir, target_size=target_size, random_state=random_state, k=-1
+    )
     data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
     # Get embeddings
-    device = 'cuda'
-    metric = 'euclidean'
+    device = "cuda"
+    metric = "euclidean"
     top_k = 20  # top k candidates
     num_ids = 15
     checkpoint_path = "./checkpoint/osnet_x1_0_market_iph_wob.pt"
-    encodings, ids = get_embeds(data_loader=data_loader, checkpoint_path=checkpoint_path, device=device, num_ids=num_ids)
+    encodings, ids = get_embeds(
+        data_loader=data_loader,
+        checkpoint_path=checkpoint_path,
+        device=device,
+        num_ids=num_ids,
+    )
 
-    get_plot(encodings=encodings, ids=ids, top_k=top_k, metric=metric, random_state=random_state)
+    get_plot(
+        encodings=encodings,
+        ids=ids,
+        top_k=top_k,
+        metric=metric,
+        random_state=random_state,
+    )

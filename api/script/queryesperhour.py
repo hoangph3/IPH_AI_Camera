@@ -5,8 +5,11 @@ import pytz
 import schedule
 import time
 from elasticsearch.helpers import scan
+
 # Connect to MongoDB
-client = pymongo.MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")  # Replace with your actual MongoDB connection URI
+client = pymongo.MongoClient(
+    "mongodb://root:password@localhost:27017/?authSource=admin"
+)  # Replace with your actual MongoDB connection URI
 database_name = "api_test"
 collection_name = "count_per_hour"
 collection = client[database_name][collection_name]
@@ -15,10 +18,13 @@ collection = client[database_name][collection_name]
 es = Elasticsearch()
 index_name = "kotora_api_test"  # Replace with your actual index name
 
+
 def query_and_save():
     try:
         # Get the current time
-        local_tz = pytz.timezone('Asia/Bangkok')  # Replace 'Asia/Bangkok' with your local timezone
+        local_tz = pytz.timezone(
+            "Asia/Bangkok"
+        )  # Replace 'Asia/Bangkok' with your local timezone
         current_time = datetime.now(local_tz)
 
         # Define the start time and end time for the current hour
@@ -35,34 +41,34 @@ def query_and_save():
             query={
                 "query": {
                     "range": {
-                        "timestamp": {
-                            "gte": start_timestamp,
-                            "lt": end_timestamp
-                        }
+                        "timestamp": {"gte": start_timestamp, "lt": end_timestamp}
                     }
                 }
             },
             index=index_name,
             scroll="2m",
-            size=1000
+            size=1000,
         )
 
         for result in scroll:
-            unique_global_ids.add(result['_source']['global_id'])
+            unique_global_ids.add(result["_source"]["global_id"])
 
         # Save the count to MongoDB
         count_data = {
             "start_time": start_time,
             "end_time": end_time,
-            "count": len(unique_global_ids)
+            "count": len(unique_global_ids),
         }
-        collection.replace_one({"start_time": start_time, "end_time": end_time}, count_data, upsert=True)
+        collection.replace_one(
+            {"start_time": start_time, "end_time": end_time}, count_data, upsert=True
+        )
 
         # Check if the data has been inserted
         print(f"Data inserted into MongoDB: {count_data}")
 
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
 # Schedule the query_and_save function to run every hour
 schedule.every().hour.do(query_and_save)

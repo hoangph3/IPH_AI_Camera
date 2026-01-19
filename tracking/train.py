@@ -23,11 +23,7 @@ def train(model, device, train_loader, optimizer, epoch, margin):
         optimizer.step()
 
         if batch_idx % 20 == 0:
-            print(
-                "Epoch {} Iteration {}: Loss = {}".format(
-                    epoch, batch_idx, loss
-                )
-            )
+            print("Epoch {} Iteration {}: Loss = {}".format(epoch, batch_idx, loss))
 
 
 if __name__ == "__main__":
@@ -35,8 +31,7 @@ if __name__ == "__main__":
     device = "cuda"
     load_checkpoint_path = "./checkpoint/osnet_x1_0_market.pt"
     reid_backend = ReIDMultiBackend(
-        weights=load_checkpoint_path,
-        device=device, fp16=False
+        weights=load_checkpoint_path, device=device, fp16=False
     )
     model = reid_backend.model
 
@@ -45,7 +40,9 @@ if __name__ == "__main__":
 
     # Dataset
     data_dir = "/media/hoang/Data/aihub/tracking/IPH_WoB/train"
-    dataset = ReIDDataset(data_dir=data_dir, target_size=(128, 256), random_state=42, k=10)
+    dataset = ReIDDataset(
+        data_dir=data_dir, target_size=(128, 256), random_state=42, k=10
+    )
     data_loader = DataLoader(dataset, batch_size=128, shuffle=True)
 
     num_epochs = 1000

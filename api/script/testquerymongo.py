@@ -9,8 +9,8 @@ db = client[database_name]
 
 # Define the query
 query = {
-    'start_time': {'$gte': datetime(2023, 12, 29, 12, 0)},
-    'end_time': {'$lte': datetime(2023, 12, 29, 13, 0)}
+    "start_time": {"$gte": datetime(2023, 12, 29, 12, 0)},
+    "end_time": {"$lte": datetime(2023, 12, 29, 13, 0)},
 }
 
 # Execute the query

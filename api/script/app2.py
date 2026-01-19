@@ -21,7 +21,7 @@ app.add_middleware(
     allow_origins=["*"],
     allow_credentials=True,
     allow_headers=["*"],
-    allow_methods=["*"]
+    allow_methods=["*"],
 )
 # Pydantic model for camera data
 class CountHorizontalRequest(BaseModel):
@@ -29,6 +29,7 @@ class CountHorizontalRequest(BaseModel):
     end_time: str
     mode: str
     camera_id: Optional[str] = None
+
 
 class Camera(BaseModel):
     name: str
@@ -51,8 +52,7 @@ class VisualizeRequest(BaseModel):
 
 
 # Connect to MongoDB
-client = MongoClient(
-    "mongodb://admin:password@localhost:27017/?authSource=admin")
+client = MongoClient("mongodb://admin:password@localhost:27017/?authSource=admin")
 database_name = "iph"
 # collection_name_day = "count_per_day"
 # collection_name_month = "count_per_month"
@@ -237,25 +237,30 @@ async def get_data_api(time_range: CountHorizontalRequest):
 
         # Convert input strings to datetime objects
         start_datetime = datetime.strptime(
-            time_range.start_time, "%H:%M %d/%m/%Y") - timedelta(hours=7)
+            time_range.start_time, "%H:%M %d/%m/%Y"
+        ) - timedelta(hours=7)
         end_datetime = datetime.strptime(
-            time_range.end_time, "%H:%M %d/%m/%Y") - timedelta(hours=7)
+            time_range.end_time, "%H:%M %d/%m/%Y"
+        ) - timedelta(hours=7)
         print()
         # MongoDB query to filter data based on start and end times
-        query = {
-            "start_time": {"$gte": start_datetime, "$lt": end_datetime}
-        }
+        query = {"start_time": {"$gte": start_datetime, "$lt": end_datetime}}
 
         # Fetch all data from the "_test_test_test_test" collection
         data = list(db[collection_name_hour].find(query).sort("start_time", ASCENDING))
 
         # Extract start_time, end_time, days, and counts from the documents
-        start_times = [(entry["start_time"] + timedelta(hours=7)
-                        ).strftime("%H:%M") for entry in data]
-        end_times = [(entry["end_time"] + timedelta(hours=7)
-                      ).strftime("%H:%M") for entry in data]
-        days = [(entry["start_time"] + timedelta(hours=7)
-                 ).strftime("%d-%m-%Y") for entry in data]
+        start_times = [
+            (entry["start_time"] + timedelta(hours=7)).strftime("%H:%M")
+            for entry in data
+        ]
+        end_times = [
+            (entry["end_time"] + timedelta(hours=7)).strftime("%H:%M") for entry in data
+        ]
+        days = [
+            (entry["start_time"] + timedelta(hours=7)).strftime("%d-%m-%Y")
+            for entry in data
+        ]
 
         # Initialize counts and total_count
         counts = []
@@ -283,8 +288,14 @@ async def get_data_api(time_range: CountHorizontalRequest):
             # Aggregate counts for each day
             aggregated_counts = {}
             for entry in data:
-                day_key = (entry["start_time"] + timedelta(hours=7)).strftime("%d-%m-%Y")
-                count = entry["camera_counts"].get(camera_id, 0) if camera_id else entry["count"]
+                day_key = (entry["start_time"] + timedelta(hours=7)).strftime(
+                    "%d-%m-%Y"
+                )
+                count = (
+                    entry["camera_counts"].get(camera_id, 0)
+                    if camera_id
+                    else entry["count"]
+                )
                 aggregated_counts[day_key] = aggregated_counts.get(day_key, 0) + count
                 total_count_day += count
 
@@ -293,10 +304,17 @@ async def get_data_api(time_range: CountHorizontalRequest):
             counts = list(aggregated_counts.values())
 
         # Add total counts to the response
-        return {"start_times": start_times, "end_times": end_times, "days": days, "counts": counts,
-                "total_count_hour": total_count_hour, "total_count_day": total_count_day}
+        return {
+            "start_times": start_times,
+            "end_times": end_times,
+            "days": days,
+            "counts": counts,
+            "total_count_hour": total_count_hour,
+            "total_count_day": total_count_day,
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 async def get_time_range(req_body: VisualizeRequest):
     current_time_utc = datetime.utcnow()
@@ -306,27 +324,26 @@ async def get_time_range(req_body: VisualizeRequest):
 
     if req_body.range_type == "day":
         start_time_bangkok = current_time_bangkok.replace(
-            hour=0, minute=0, second=0, microsecond=0)
+            hour=0, minute=0, second=0, microsecond=0
+        )
     elif req_body.range_type == "week":
         days_to_monday = current_time_bangkok.weekday()
-        start_time_bangkok = current_time_bangkok - \
-            timedelta(days=days_to_monday)
+        start_time_bangkok = current_time_bangkok - timedelta(days=days_to_monday)
         start_time_bangkok = start_time_bangkok.replace(
-            hour=0, minute=0, second=0, microsecond=0)
+            hour=0, minute=0, second=0, microsecond=0
+        )
     elif req_body.range_type == "month":
         start_time_bangkok = current_time_bangkok.replace(
-            day=1, hour=0, minute=0, second=0, microsecond=0)
+            day=1, hour=0, minute=0, second=0, microsecond=0
+        )
 
     start_time_utc = start_time_bangkok - timedelta(hours=7)
     if req_body.range_type == "day":
-        end_time_utc = end_time_bangkok - \
-            timedelta(hours=7) - timedelta(hours=1)
+        end_time_utc = end_time_bangkok - timedelta(hours=7) - timedelta(hours=1)
     elif req_body.range_type == "week":
-        end_time_utc = end_time_bangkok - \
-            timedelta(hours=7) - timedelta(days=1)
+        end_time_utc = end_time_bangkok - timedelta(hours=7) - timedelta(days=1)
     elif req_body.range_type == "month":
-        end_time_utc = end_time_bangkok - \
-            timedelta(hours=7) - timedelta(days=1)
+        end_time_utc = end_time_bangkok - timedelta(hours=7) - timedelta(days=1)
 
     return start_time_utc, end_time_utc
 
@@ -343,23 +360,38 @@ async def get_time_range(req_body: VisualizeRequest):
 #         query = {"start_time": {"$gte": start_time_utc, "$lt": end_time_utc}}
 
 #     return collection, query
-async def get_mongo_query_and_collection_v2(req_body: VisualizeRequest, start_time_utc, end_time_utc):
+async def get_mongo_query_and_collection_v2(
+    req_body: VisualizeRequest, start_time_utc, end_time_utc
+):
     if req_body.range_type == "day" or req_body.range_type == "week":
         collection = client[database_name][collection_name_hour]
         query = {"start_time": {"$gte": start_time_utc, "$lt": end_time_utc}}
     elif req_body.range_type == "month":
         collection = client[database_name][collection_name_hour]
-        query = {"start_time": {"$gte": start_time_utc, "$lt": end_time_utc + relativedelta(months=1)}}
+        query = {
+            "start_time": {
+                "$gte": start_time_utc,
+                "$lt": end_time_utc + relativedelta(months=1),
+            }
+        }
 
     return collection, query
 
-async def extract_and_return_response(documents, start_time_key, end_time_key, collection_name_used):
-    start_times = [(doc[start_time_key] + timedelta(hours=7)
-                    ).strftime("%H:%M") for doc in documents]
-    end_times = [(doc[end_time_key] + timedelta(hours=7)
-                  ).strftime("%H:%M") for doc in documents]
-    days = [(doc[start_time_key] + timedelta(hours=7)).strftime("%d-%m")
-            for doc in documents]  # Change format if needed
+
+async def extract_and_return_response(
+    documents, start_time_key, end_time_key, collection_name_used
+):
+    start_times = [
+        (doc[start_time_key] + timedelta(hours=7)).strftime("%H:%M")
+        for doc in documents
+    ]
+    end_times = [
+        (doc[end_time_key] + timedelta(hours=7)).strftime("%H:%M") for doc in documents
+    ]
+    days = [
+        (doc[start_time_key] + timedelta(hours=7)).strftime("%d-%m")
+        for doc in documents
+    ]  # Change format if needed
     counts = [doc["count"] for doc in documents]
     total_count = sum(counts)
 
@@ -369,36 +401,54 @@ async def extract_and_return_response(documents, start_time_key, end_time_key, c
         "days": days,
         "counts": counts,
         "collection_used": collection_name_used,
-        "total_count": total_count
+        "total_count": total_count,
     }
-async def extract_and_return_response_v2(documents, start_time_key, end_time_key, collection_name_used, range_type):
+
+
+async def extract_and_return_response_v2(
+    documents, start_time_key, end_time_key, collection_name_used, range_type
+):
     if range_type == "week":
         # Calculate the start of the week
         current_time_bangkok = datetime.utcnow() + timedelta(hours=7)
         days_to_monday = current_time_bangkok.weekday()
         start_of_week_bangkok = current_time_bangkok - timedelta(days=days_to_monday)
-        start_of_week_bangkok = start_of_week_bangkok.replace(hour=0, minute=0, second=0, microsecond=0)
+        start_of_week_bangkok = start_of_week_bangkok.replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
 
         # Aggregate counts for each day of the week
         daily_counts = defaultdict(int)
 
         for doc in documents:
-            day_of_week = (doc[start_time_key] + timedelta(hours=7)).strftime("%d-%m %a")
+            day_of_week = (doc[start_time_key] + timedelta(hours=7)).strftime(
+                "%d-%m %a"
+            )
             daily_counts[day_of_week] += doc["count"]
 
         # Filter only days from the start of the week until the day before the current day
-        filtered_counts = {key: value for key, value in daily_counts.items() if key <= current_time_bangkok.strftime("%d-%m %a")}
+        filtered_counts = {
+            key: value
+            for key, value in daily_counts.items()
+            if key <= current_time_bangkok.strftime("%d-%m %a")
+        }
 
         # Format aggregated data
         start_times = list(filtered_counts.keys())
-        end_times = start_times  # Since it's aggregated for each day, end time is the same as start time
-        days = [start_time.split()[0] for start_time in start_times]  # Extracting only the date
+        end_times = (
+            start_times
+        )  # Since it's aggregated for each day, end time is the same as start time
+        days = [
+            start_time.split()[0] for start_time in start_times
+        ]  # Extracting only the date
         counts = list(filtered_counts.values())
         total_count = sum(counts)
     elif range_type == "month":
         # Calculate the start of the month
         current_time_bangkok = datetime.utcnow() + timedelta(hours=7)
-        start_of_month_bangkok = current_time_bangkok.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        start_of_month_bangkok = current_time_bangkok.replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0
+        )
 
         # Aggregate counts for each day of the month
         daily_counts = defaultdict(int)
@@ -408,23 +458,37 @@ async def extract_and_return_response_v2(documents, start_time_key, end_time_key
             daily_counts[day_of_month] += doc["count"]
 
         # Filter only days from the start of the month until the day before the current day
-        filtered_counts = {key: value for key, value in daily_counts.items() if key <= current_time_bangkok.strftime("%d-%m")}
+        filtered_counts = {
+            key: value
+            for key, value in daily_counts.items()
+            if key <= current_time_bangkok.strftime("%d-%m")
+        }
 
         # Format aggregated data
         start_times = list(filtered_counts.keys())
-        end_times = [(start_of_month_bangkok + timedelta(days=int(key.split("-")[0]) - 1)).strftime("%d-%m")
-                     for key in filtered_counts.keys()]  # Calculate end times based on day of the month
+        end_times = [
+            (
+                start_of_month_bangkok + timedelta(days=int(key.split("-")[0]) - 1)
+            ).strftime("%d-%m")
+            for key in filtered_counts.keys()
+        ]  # Calculate end times based on day of the month
         days = start_times  # Use start times as days
         counts = list(filtered_counts.values())
         total_count = sum(counts)
     else:
         # Default format for other range types
-        start_times = [(doc[start_time_key] + timedelta(hours=7)
-                        ).strftime("%H:%M") for doc in documents]
-        end_times = [(doc[end_time_key] + timedelta(hours=7)
-                      ).strftime("%H:%M") for doc in documents]
-        days = [(doc[start_time_key] + timedelta(hours=7)).strftime("%d-%m")
-                for doc in documents]
+        start_times = [
+            (doc[start_time_key] + timedelta(hours=7)).strftime("%H:%M")
+            for doc in documents
+        ]
+        end_times = [
+            (doc[end_time_key] + timedelta(hours=7)).strftime("%H:%M")
+            for doc in documents
+        ]
+        days = [
+            (doc[start_time_key] + timedelta(hours=7)).strftime("%d-%m")
+            for doc in documents
+        ]
         counts = [doc["count"] for doc in documents]
         total_count = sum(counts)
 
@@ -434,8 +498,9 @@ async def extract_and_return_response_v2(documents, start_time_key, end_time_key
         "days": days,
         "counts": counts,
         "collection_used": collection_name_used,
-        "total_count": total_count
+        "total_count": total_count,
     }
+
 
 @app.post("/visualize_v2/")
 async def visualize_data(req_body: VisualizeRequest):
@@ -443,32 +508,49 @@ async def visualize_data(req_body: VisualizeRequest):
         start_time_utc, end_time_utc = await get_time_range(req_body)
         print(start_time_utc, end_time_utc)
 
-        collection, query = await get_mongo_query_and_collection_v2(req_body, start_time_utc, end_time_utc)
+        collection, query = await get_mongo_query_and_collection_v2(
+            req_body, start_time_utc, end_time_utc
+        )
 
         # Retrieve documents in the specified period
         documents = list(collection.find(query))
 
         if req_body.range_type == "day":
-            return await extract_and_return_response_v2(documents, "start_time", "end_time", collection_name_hour,req_body.range_type)
+            return await extract_and_return_response_v2(
+                documents,
+                "start_time",
+                "end_time",
+                collection_name_hour,
+                req_body.range_type,
+            )
         elif req_body.range_type == "week":
-            return await extract_and_return_response_v2(documents, "start_time", "end_time", collection_name_hour,req_body.range_type)
+            return await extract_and_return_response_v2(
+                documents,
+                "start_time",
+                "end_time",
+                collection_name_hour,
+                req_body.range_type,
+            )
         elif req_body.range_type == "month":
-            return await extract_and_return_response_v2(documents, "start_time", "end_time", collection_name_hour, req_body.range_type)
+            return await extract_and_return_response_v2(
+                documents,
+                "start_time",
+                "end_time",
+                collection_name_hour,
+                req_body.range_type,
+            )
 
         else:
             raise HTTPException(
-                status_code=400, detail="Invalid range type. Please provide 'day', 'week', or 'month'.")
+                status_code=400,
+                detail="Invalid range type. Please provide 'day', 'week', or 'month'.",
+            )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 def query_mongo(start_time, end_time, start_date, end_date):
-    results = {
-        "start_times": [],
-        "end_times": [],
-        "days": [],
-        "counts": []
-    }
+    results = {"start_times": [], "end_times": [], "days": [], "counts": []}
 
     # Convert input date strings to datetime objects
     start_datetime = datetime.strptime(start_date, "%d/%m/%Y")
@@ -479,20 +561,36 @@ def query_mongo(start_time, end_time, start_date, end_date):
     while current_date <= end_datetime:
         # Build query for each day
         query = {
-            "start_time": {"$gte": current_date.replace(hour=int(start_time.split(':')[0]), minute=int(start_time.split(':')[1]))},
-            "end_time": {"$lte": current_date.replace(hour=int(end_time.split(':')[0]), minute=int(end_time.split(':')[1]))}
+            "start_time": {
+                "$gte": current_date.replace(
+                    hour=int(start_time.split(":")[0]),
+                    minute=int(start_time.split(":")[1]),
+                )
+            },
+            "end_time": {
+                "$lte": current_date.replace(
+                    hour=int(end_time.split(":")[0]), minute=int(end_time.split(":")[1])
+                )
+            },
         }
 
         # Execute query and sum counts
         day_results = db[collection_name_hour].find(
-            query, {"start_time": 1, "end_time": 1, "count": 1})
+            query, {"start_time": 1, "end_time": 1, "count": 1}
+        )
         total_count = sum(result["count"] for result in day_results)
 
         # Append results
-        results["start_times"].append(current_date.replace(hour=int(start_time.split(
-            ':')[0]), minute=int(start_time.split(':')[1])).strftime("%H:%M"))
-        results["end_times"].append(current_date.replace(hour=int(
-            end_time.split(':')[0]), minute=int(end_time.split(':')[1])).strftime("%H:%M"))
+        results["start_times"].append(
+            current_date.replace(
+                hour=int(start_time.split(":")[0]), minute=int(start_time.split(":")[1])
+            ).strftime("%H:%M")
+        )
+        results["end_times"].append(
+            current_date.replace(
+                hour=int(end_time.split(":")[0]), minute=int(end_time.split(":")[1])
+            ).strftime("%H:%M")
+        )
         results["days"].append(current_date.strftime("%d/%m/%Y"))
         results["counts"].append(total_count)
 
@@ -521,25 +619,21 @@ def gen_frames():  # generate frame by frame from camera
         if not success:
             break
         else:
-            ret, buffer = cv2.imencode('.jpg', frame)
+            ret, buffer = cv2.imencode(".jpg", frame)
             frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
+            yield (
+                b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + frame + b"\r\n"
+            )  # concat frame one by one and show result
 
 
-@app.get('/video_feed')
+@app.get("/video_feed")
 def video_feed():
     # Video streaming route. Put this in the src attribute of an img tag
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(gen_frames(), mimetype="multipart/x-mixed-replace; boundary=frame")
 
 
 def query_mongo_for_camera(start_time, end_time, start_date, end_date, camera_id):
-    results = {
-        "start_times": [],
-        "end_times": [],
-        "days": [],
-        "counts": []
-    }
+    results = {"start_times": [], "end_times": [], "days": [], "counts": []}
 
     # Convert input date strings to datetime objects
     start_datetime = datetime.strptime(start_date, "%d/%m/%Y")
@@ -551,25 +645,38 @@ def query_mongo_for_camera(start_time, end_time, start_date, end_date, camera_id
         # Build query for each day and the specified camera
         query = {
             "start_time": {
-                "$gte": current_date.replace(hour=int(start_time.split(':')[0]), minute=int(start_time.split(':')[1]))
+                "$gte": current_date.replace(
+                    hour=int(start_time.split(":")[0]),
+                    minute=int(start_time.split(":")[1]),
+                )
             },
             "end_time": {
-                "$lte": current_date.replace(hour=int(end_time.split(':')[0]), minute=int(end_time.split(':')[1]))
+                "$lte": current_date.replace(
+                    hour=int(end_time.split(":")[0]), minute=int(end_time.split(":")[1])
+                )
             },
-            "camera_counts." + camera_id: {"$exists": True}
+            "camera_counts." + camera_id: {"$exists": True},
         }
 
         # Execute query and get counts for the specified camera
         day_results = db[collection_name_hour].find(
-            query, {"start_time": 1, "end_time": 1, f"camera_counts.{camera_id}": 1})
-        counts_for_camera = [result["camera_counts"][camera_id]
-                             for result in day_results]
+            query, {"start_time": 1, "end_time": 1, f"camera_counts.{camera_id}": 1}
+        )
+        counts_for_camera = [
+            result["camera_counts"][camera_id] for result in day_results
+        ]
 
         # Append results
-        results["start_times"].append(current_date.replace(hour=int(start_time.split(
-            ':')[0]), minute=int(start_time.split(':')[1])).strftime("%H:%M"))
-        results["end_times"].append(current_date.replace(hour=int(
-            end_time.split(':')[0]), minute=int(end_time.split(':')[1])).strftime("%H:%M"))
+        results["start_times"].append(
+            current_date.replace(
+                hour=int(start_time.split(":")[0]), minute=int(start_time.split(":")[1])
+            ).strftime("%H:%M")
+        )
+        results["end_times"].append(
+            current_date.replace(
+                hour=int(end_time.split(":")[0]), minute=int(end_time.split(":")[1])
+            ).strftime("%H:%M")
+        )
         results["days"].append(current_date.strftime("%d/%m/%Y"))
         results["counts"].append(sum(counts_for_camera))
 
@@ -577,27 +684,29 @@ def query_mongo_for_camera(start_time, end_time, start_date, end_date, camera_id
         current_date += timedelta(days=1)
 
     return results
+
+
 # Updated endpoint for counts for a specific camera
 
 
 @app.post("/count_vertical_camera")
-async def get_counts_for_camera(
-    request_data: dict
-):
+async def get_counts_for_camera(request_data: dict):
     try:
         time_params = request_data.get("time_params", {})
         camera_id = request_data.get("camera_id")
 
         if not camera_id:
             raise HTTPException(
-                status_code=400, detail="The 'camera_id' field is required in the request body.")
+                status_code=400,
+                detail="The 'camera_id' field is required in the request body.",
+            )
 
         results = query_mongo_for_camera(
             time_params.get("start_time"),
             time_params.get("end_time"),
             time_params.get("start_date"),
             time_params.get("end_date"),
-            camera_id
+            camera_id,
         )
 
         return results

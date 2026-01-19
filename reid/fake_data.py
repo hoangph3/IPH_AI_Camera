@@ -19,10 +19,12 @@ def increment_timestamp(sample_data):
     sample_data["timestamp"] = timestamp_ms + 1
     print(f"Timestamp incremented to {sample_data['timestamp']}")
 
+
 # Function to insert data into MongoDB
 def insert_data(sample_data):
     collection.insert_one(sample_data)
     print(f"Data inserted at {sample_data['timestamp']}")
+
 
 # Initial timestamp from the loaded sample data
 current_timestamp = base_sample_data.get("timestamp", 0)
@@ -34,4 +36,3 @@ while True:
     increment_timestamp(new_sample)
     insert_data(new_sample)
     current_timestamp += 1  # Increment timestamp for the next iteration
-

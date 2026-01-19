@@ -7,6 +7,4 @@ if __name__ == "__main__":
     matcher = Matching(config=matching_config)
 
     camera_config = get_hparams_from_file("./env/camera.json", as_dict=True)
-    matcher.run(
-        camera_graph=camera_config["graph"]
-    )
+    matcher.run(camera_graph=camera_config["graph"])

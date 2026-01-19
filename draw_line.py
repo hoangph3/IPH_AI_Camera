@@ -1,5 +1,6 @@
 import cv2
 
+
 def draw_line(event, x, y, flags, param):
     global drawing, line_start, line_end, ix, iy
 
@@ -15,6 +16,7 @@ def draw_line(event, x, y, flags, param):
         endpoints.append(((ix, iy), (x, y)))
         cv2.imshow("Draw Line", img)
 
+
 endpoints = []
 save_dir = ""
 # Open the video file
@@ -26,9 +28,9 @@ cap = cv2.VideoCapture(input_video_path)
 ret, frame = cap.read()
 
 # Resize the frame to 2560 x 1440 pixels
-#target_resolution = (1920, 1080)
-#target_resolution = (1280,960)
-#frame = cv2.resize(frame, target_resolution)    
+# target_resolution = (1920, 1080)
+# target_resolution = (1280,960)
+# frame = cv2.resize(frame, target_resolution)
 
 img = frame.copy()
 
@@ -43,10 +45,10 @@ while True:
     cv2.imshow("Draw Line", img)
     key = cv2.waitKey(1) & 0xFF
 
-    if key == ord('c'):  # Press 'c' to apply the drawn line to the video
+    if key == ord("c"):  # Press 'c' to apply the drawn line to the video
         break
 
-    elif key == ord('r'):  # Press 'r' to reset the drawn line
+    elif key == ord("r"):  # Press 'r' to reset the drawn line
         img = frame.copy()
         line_start, line_end = (-1, -1), (-1, -1)
 

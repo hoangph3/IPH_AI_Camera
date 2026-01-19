@@ -13,7 +13,7 @@ def get_time():
 
 
 def time2datetime(time):
-    return datetime.fromtimestamp(time/1000)
+    return datetime.fromtimestamp(time / 1000)
 
 
 def datetime2time(dt: datetime):

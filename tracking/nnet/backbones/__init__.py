@@ -15,10 +15,10 @@ __model_factory = {
     "osnet_x0_75": osnet_x0_75,
     "osnet_x0_5": osnet_x0_5,
     "osnet_x0_25": osnet_x0_25,
-    "osnet_ibn_x1_0": osnet_ibn_x1_0
+    "osnet_ibn_x1_0": osnet_ibn_x1_0,
 }
 
-NR_CLASSES_DICT = {'market': 751, 'duke': 702, 'veri': 576, 'vehicleid': 576}
+NR_CLASSES_DICT = {"market": 751, "duke": 702, "veri": 576, "vehicleid": 576}
 
 
 def show_avai_models():
@@ -39,7 +39,9 @@ def get_model_name(weights):
 
 
 def get_nr_classes(weights):
-    num_classes = [value for key, value in NR_CLASSES_DICT.items() if key in str(weights)]
+    num_classes = [
+        value for key, value in NR_CLASSES_DICT.items() if key in str(weights)
+    ]
     if len(num_classes) == 0:
         num_classes = 1
     else:

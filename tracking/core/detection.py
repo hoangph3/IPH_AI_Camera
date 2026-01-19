@@ -22,7 +22,7 @@ class Detection:
         self.mongo_collection = config.backend.mongo.tracking.collection
 
         # Model detect
-        self.det_model = YOLO(model=config.model.detect.checkpoint, task='detect')
+        self.det_model = YOLO(model=config.model.detect.checkpoint, task="detect")
         self.det_conf = config.model.detect.conf
         self.det_overlap = config.model.detect.overlap
         self.det_classes = config.model.detect.classes
@@ -30,8 +30,8 @@ class Detection:
         # Model reid
         self.reid_model = ReIDMultiBackend(
             weights=config.model.reid.checkpoint,
-            device='cuda' if torch.cuda.is_available() else 'cpu',
-            fp16=config.model.reid.fp16
+            device="cuda" if torch.cuda.is_available() else "cpu",
+            fp16=config.model.reid.fp16,
         )
         self.reid_input_size = config.model.reid.input_size  # (w, h)
 
@@ -42,10 +42,10 @@ class Detection:
         while True:
             track_events = []  # track_events need to be inserted to mongo
             try:
-                keys = self.redis_client.keys('*')
+                keys = self.redis_client.keys("*")
                 for key in keys:
                     # Get key name & data
-                    key = key.decode('utf-8')
+                    key = key.decode("utf-8")
                     data = self.redis_client.lpop(key)
 
                     # Validate data
@@ -53,14 +53,17 @@ class Detection:
                         continue
 
                     frame_info = pickle.loads(data)
-                    img = frame_info.get('frame_data')
-                    timestamp = frame_info.get('frame_time')
+                    img = frame_info.get("frame_data")
+                    timestamp = frame_info.get("frame_time")
                     if img is None:
                         continue
 
                     # Object detect
                     det_preds = self.det_model.predict(
-                        source=img, classes=self.det_classes, verbose=True, conf=self.det_conf
+                        source=img,
+                        classes=self.det_classes,
+                        verbose=True,
+                        conf=self.det_conf,
                     )
 
                     # Compute fps
@@ -75,7 +78,9 @@ class Detection:
                     scores = det_boxes[:, 4].astype(np.float32)
                     bounding_boxes = det_boxes[:, 0:4].astype(np.int32)
                     selected_indices = processing.non_max_suppression(
-                        boxes=bounding_boxes, max_bbox_overlap=self.det_overlap, scores=scores
+                        boxes=bounding_boxes,
+                        max_bbox_overlap=self.det_overlap,
+                        scores=scores,
                     )
                     bounding_boxes = bounding_boxes[selected_indices]
 
@@ -90,41 +95,49 @@ class Detection:
                         conf = round(float(conf), 4)
                         box_img = img[y1:y2, x1:x2]
                         height_img = img.shape[0]
-                        upper, lower = halve_bbox_y(xyxy) 
+                        upper, lower = halve_bbox_y(xyxy)
 
                         # Filter box & camera zone
-                        if (y2 > 2/3 * height_img) or (key not in camera_zone):
-                            logger.info("Not valid box, cause y2: {}, max_y2: {}, cam: {}".format(
-                                y2, 2/3*height_img, key
-                            ))
+                        if (y2 > 2 / 3 * height_img) or (key not in camera_zone):
+                            logger.info(
+                                "Not valid box, cause y2: {}, max_y2: {}, cam: {}".format(
+                                    y2, 2 / 3 * height_img, key
+                                )
+                            )
                             continue
 
-                        line_intersect = camera_zone[key]['line_intersect']
-                        box_time = camera_zone[key]['box_time']
+                        line_intersect = camera_zone[key]["line_intersect"]
+                        box_time = camera_zone[key]["box_time"]
 
-                        bool_intersect_lower = box_line_intersection(lower, line_intersect)
-                        bool_intersect_upper = box_line_intersection(upper, line_intersect)
+                        bool_intersect_lower = box_line_intersection(
+                            lower, line_intersect
+                        )
+                        bool_intersect_upper = box_line_intersection(
+                            upper, line_intersect
+                        )
 
                         if bool_intersect_lower and bool_intersect_upper == False:
-                            waypath = 'Up'
+                            waypath = "Up"
                         elif bool_intersect_upper and bool_intersect_lower == False:
                             waypath = "Down"
                         else:
-                            waypath = ''
+                            waypath = ""
 
                         if waypath != "Down":
                             continue
 
                         event = {
-                            'camera_id': key,
-                            'object_bbox': xyxy,
-                            'confidence': conf,
-                            'waypath': waypath,
-                            'timestamp': timestamp,
+                            "camera_id": key,
+                            "object_bbox": xyxy,
+                            "confidence": conf,
+                            "waypath": waypath,
+                            "timestamp": timestamp,
                             # 'box_time': box_time,
                             # 'line_intersect': line_intersect,
-                            'feature_embeddings': feature.tolist(),
-                            'object_image': dataio.convert_numpy_array_to_bytes(box_img),
+                            "feature_embeddings": feature.tolist(),
+                            "object_image": dataio.convert_numpy_array_to_bytes(
+                                box_img
+                            ),
                             # 'full_image': dataio.convert_numpy_array_to_bytes(img)
                         }
 
@@ -133,7 +146,9 @@ class Detection:
                 if len(track_events):
                     logger.info("Track: {} events".format(len(track_events)))
                     self.mongo_client.create(
-                        db_name=self.mongo_database, collection_name=self.mongo_collection, data=track_events
+                        db_name=self.mongo_database,
+                        collection_name=self.mongo_collection,
+                        data=track_events,
                     )
 
             except Exception as e:

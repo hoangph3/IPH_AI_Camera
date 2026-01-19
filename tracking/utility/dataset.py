@@ -8,7 +8,9 @@ from .processing import img_norm, resize_with_pad, reshape_img
 
 
 class ReIDDataset(Dataset):
-    def __init__(self, data_dir="IPH_WoB", target_size=(128, 256), k=30, random_state=42) -> None:
+    def __init__(
+        self, data_dir="IPH_WoB", target_size=(128, 256), k=30, random_state=42
+    ) -> None:
         self.data_dir = data_dir
         self.target_size = target_size
         self.k = k
@@ -40,12 +42,15 @@ class ReIDDataset(Dataset):
                 image_resize = convert_bgr2rgb(image_resize)
 
                 # target_size = (W x H)
-                if image_resize.shape[0] != target_size[1] or image_resize.shape[1] != target_size[0]:
+                if (
+                    image_resize.shape[0] != target_size[1]
+                    or image_resize.shape[1] != target_size[0]
+                ):
                     continue
-            
+
                 image_resize = img_norm(image_resize)
                 image_resize = reshape_img(image_resize)  # N x C x H x W
-                
+
                 encodings.append(image_resize)
                 ids.append(_id)
 

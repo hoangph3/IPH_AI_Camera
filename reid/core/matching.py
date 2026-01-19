@@ -21,7 +21,7 @@ class Matching:
         self.chroma_client = ChromaBackend(
             host=config.backend.chroma.host,
             port=config.backend.chroma.port,
-            metric=config.metric
+            metric=config.metric,
         )
 
     def get_centroids(self, X: np.ndarray):
@@ -34,7 +34,9 @@ class Matching:
         match_q_nbrs_dists = []
         match_q_nbrs_metas = []
         match_q_nbrs_embeds = []
-        for q_dists, q_metas, q_embeds in zip(q_nbrs_dists, q_nbrs_metas, q_nbrs_embeds):
+        for q_dists, q_metas, q_embeds in zip(
+            q_nbrs_dists, q_nbrs_metas, q_nbrs_embeds
+        ):
             for q_dist, q_meta, q_embed in zip(q_dists, q_metas, q_embeds):
                 # Remove outliers
                 if q_dist > self.config.matching.threshold:
@@ -51,26 +53,25 @@ class Matching:
         while True:
             # Get last tracking data
             last_tracking_dt = self.database.get_last_tracking_data()
-            last_tracking_time = last_tracking_dt.get('timestamp')
+            last_tracking_time = last_tracking_dt.get("timestamp")
             if last_tracking_time is None:
                 time.sleep(self.config.interval)
                 continue
 
             # Get last reid data
             last_reid_dt = self.database.get_last_reid_data()
-            last_reid_time = last_reid_dt.get('query_time')
+            last_reid_time = last_reid_dt.get("query_time")
             if (last_reid_time is not None) and (
-                (
-                    handler.get_time() - last_reid_time < self.config.batch_time
-                ) or (
-                    last_tracking_time - last_reid_time  < self.config.batch_time
-                )
+                (handler.get_time() - last_reid_time < self.config.batch_time)
+                or (last_tracking_time - last_reid_time < self.config.batch_time)
             ):
-                logger.info("Need more data, from last tracking: {}, last reid: {} to: {}".format(
-                    handler.time2datetime(last_tracking_time),
-                    handler.time2datetime(last_reid_time),
-                    handler.time2datetime(handler.get_time())
-                ))
+                logger.info(
+                    "Need more data, from last tracking: {}, last reid: {} to: {}".format(
+                        handler.time2datetime(last_tracking_time),
+                        handler.time2datetime(last_reid_time),
+                        handler.time2datetime(handler.get_time()),
+                    )
+                )
                 time.sleep(self.config.interval)
                 continue
 
@@ -78,21 +79,21 @@ class Matching:
             tracking_dt = self.database.get_history_tracking_data(
                 time_from=last_reid_time, time_to=handler.get_time()
             )
-            if len(tracking_dt)<=self.config.min_events:
+            if len(tracking_dt) <= self.config.min_events:
                 continue
             logger.info("Tracking events: {}".format(len(tracking_dt)))
 
-            features = np.array([doc['feature_embeddings'] for doc in tracking_dt])
-            cam_ids = np.array([doc['camera_id'] for doc in tracking_dt])
-            timestamps = np.array([doc['timestamp'] for doc in tracking_dt])
+            features = np.array([doc["feature_embeddings"] for doc in tracking_dt])
+            cam_ids = np.array([doc["camera_id"] for doc in tracking_dt])
+            timestamps = np.array([doc["timestamp"] for doc in tracking_dt])
             # box_images = np.array([doc['object_image'] for doc in tracking_dt])
 
             # TODO: Clustering
             clustering_params = {
-                'n_clusters': None,
-                'metric': self.config.metric,
-                'distance_threshold': self.config.clustering.threshold,
-                'linkage': self.config.clustering.linkage
+                "n_clusters": None,
+                "metric": self.config.metric,
+                "distance_threshold": self.config.clustering.threshold,
+                "linkage": self.config.clustering.linkage,
             }
             clustering = AgglomerativeClustering(**clustering_params).fit(features)
 
@@ -115,12 +116,13 @@ class Matching:
                 # TODO: Search by query = (num_query, dim)
                 search_query = self.chroma_client.search(
                     collection=self.config.backend.chroma.collection,
-                    embeddings=query, topk=self.config.matching.top_k
+                    embeddings=query,
+                    topk=self.config.matching.top_k,
                 )  # (n_query, k)
 
-                q_nbrs_dists = search_query['distances']
-                q_nbrs_metas = search_query['metadatas']
-                q_nbrs_embeds = search_query['embeddings']
+                q_nbrs_dists = search_query["distances"]
+                q_nbrs_metas = search_query["metadatas"]
+                q_nbrs_embeds = search_query["embeddings"]
 
                 # Build candidates
                 q_candidates = []
@@ -140,23 +142,24 @@ class Matching:
                         if neighbor_cam and q_meta["camera_id"] not in neighbor_cam:
                             continue
 
-                        q_candidates.append({
-                            'global_id': q_meta["global_id"],
-                            'dist': q_dist
-                        })
+                        q_candidates.append(
+                            {"global_id": q_meta["global_id"], "dist": q_dist}
+                        )
 
                 # Candidates found
                 if len(q_candidates):
                     df = pd.DataFrame(q_candidates)
                     stats = []
-                    for global_id, sub_df in df.groupby('global_id'):
-                        stats.append({
-                            'global_id': global_id,
-                            'dist': float(np.mean(sub_df['dist'].values.tolist()))
-                        })
-                    stats = sorted(stats, key=lambda d: d['dist'])
-                    global_id = stats[0]['global_id']
-                    dist = stats[0]['dist']
+                    for global_id, sub_df in df.groupby("global_id"):
+                        stats.append(
+                            {
+                                "global_id": global_id,
+                                "dist": float(np.mean(sub_df["dist"].values.tolist())),
+                            }
+                        )
+                    stats = sorted(stats, key=lambda d: d["dist"])
+                    global_id = stats[0]["global_id"]
+                    dist = stats[0]["dist"]
                 else:
                     global_id = handler.get_id(short=True)
                     # Add new global_id
@@ -164,7 +167,9 @@ class Matching:
                         collection=self.config.backend.chroma.collection,
                         embeddings=query,
                         ids=[handler.get_id() for _ in range(len(query))],
-                        metadatas=[{"global_id": global_id, "camera_id": cid} for cid in cam_id]
+                        metadatas=[
+                            {"global_id": global_id, "camera_id": cid} for cid in cam_id
+                        ],
                     )
                     dist = -1
 
@@ -174,8 +179,8 @@ class Matching:
                         "query_cam": cam_id[qidx],
                         "query_time": int(timestamp[qidx]),
                         "global_id": global_id,
-                        'dist': dist,
-                        'box_img': None
+                        "dist": dist,
+                        "box_img": None
                         # "box_img": box_image[qidx]
                     }
                     reid_events.append(event)

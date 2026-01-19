@@ -10,25 +10,23 @@ class ChromaBackend:
         self.client = chromadb.HttpClient(
             host=host, port=port, settings=Settings(anonymized_telemetry=False)
         )
-        if metric == 'euclidean':
-            metric = 'l2'
-        self.index_params = {'hnsw:space': metric}
+        if metric == "euclidean":
+            metric = "l2"
+        self.index_params = {"hnsw:space": metric}
 
     def create(self, collection):
-        self.client.get_or_create_collection(
-            collection, metadata=self.index_params
-        )
+        self.client.get_or_create_collection(collection, metadata=self.index_params)
 
     def drop(self, collection):
         return self.client.delete_collection(collection)
 
     def get(self, collection, filter_by=None, include=None):
         if include is None:
-            include = ['embeddings', 'metadatas']
+            include = ["embeddings", "metadatas"]
         if filter_by is None:
-            filter_by = {'global_id': {'$ne': ''}}
+            filter_by = {"global_id": {"$ne": ""}}
         col = self.client.get_or_create_collection(collection, self.index_params)
-        results = col.get(where=filter_by, include=include)['metadatas']
+        results = col.get(where=filter_by, include=include)["metadatas"]
         return results
 
     def insert(self, collection, embeddings, ids, metadatas):
@@ -43,7 +41,7 @@ class ChromaBackend:
             embeddings = embeddings.tolist()
 
         if include is None:
-            include = ['distances', 'embeddings', 'metadatas']
+            include = ["distances", "embeddings", "metadatas"]
         col = self.client.get_or_create_collection(collection, self.index_params)
         results = col.query(embeddings, n_results=topk, include=include)
         return results

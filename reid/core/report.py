@@ -4,131 +4,138 @@ import time
 
 from utility.hparams import HParams
 from utility.database import Database
-from IPython.display import display
 from utility import handler
 from loguru import logger
-
 
 
 class Report:
     def __init__(self, config: HParams) -> None:
         self.config = config
         self.database = Database(config=config)
-        self.report_batch_time = config.backend.mongo.report.batch_time
-
+        self.report_batch_time = config.backend.mongo.report.batch_time  # seconds
 
     def run(self):
-        batch_time = timedelta(hours=self.report_batch_time // 3600)
+        batch_time = timedelta(seconds=self.report_batch_time)
         idle_time = 5
 
         while True:
-            last_reid_data = self.database.get_last_reid_data()
-            last_reid_time = last_reid_data.get("query_time")
+            try:
+                # =========================
+                # 1. Get last reid time
+                # =========================
+                last_reid_data = self.database.get_last_reid_data()
+                last_reid_time = last_reid_data.get("query_time")
 
-            # Not reid yet
-            if last_reid_time is None:
-                logger.info("Not reid: {}".format(last_reid_data))
-                time.sleep(idle_time)
-                continue
+                if last_reid_time is None:
+                    logger.info("Not reid yet")
+                    time.sleep(idle_time)
+                    continue
 
-            last_report_data = self.database.get_last_report_data()
-            last_report_time = last_report_data.get("end_time")
+                # =========================
+                # 2. Get last report time
+                # =========================
+                last_report_data = self.database.get_last_report_data()
+                last_report_time = last_report_data.get("end_time")
 
-            # Not report yet
-            if last_report_time is None:
-                reid_data = self.database.get_history_reid_data(
-                    time_from=None,
-                    time_to=handler.get_time()
-                )
-                reid_data = sorted(reid_data, key=lambda d: d['query_time'])
-                last_report_time = reid_data[0]['query_time']
-                start_time = handler.time2datetime(last_report_time).replace(
-                    minute=0, second=0
-                )
-            else:
-                start_time = last_report_time.replace(
-                    minute=0, second=0
-                )
+                # =========================
+                # 3. Current hour (rounded)
+                # =========================
+                now = handler.get_datetime().replace(minute=0, second=0, microsecond=0)
 
-            end_time = handler.get_datetime()
-            
-            if end_time.minute == 0 and end_time.second == 0:
-                end_time.replace(
-                    minute=0, second=0
-                )
-                
+                # Trigger only when reach hour boundary
+                if handler.get_datetime().minute != 0:
+                    time.sleep(idle_time)
+                    continue
+
+                # =========================
+                # 4. Init start_time
+                # =========================
+                if last_report_time is None:
+                    # First time: align to first reid hour
+                    start_time = handler.time2datetime(last_reid_time).replace(
+                        minute=0, second=0, microsecond=0
+                    )
+                else:
+                    start_time = last_report_time
+
+                # No new batch
+                if start_time >= now:
+                    time.sleep(idle_time)
+                    continue
+
+                # =========================
+                # 5. Split time boxes
+                # =========================
                 time_boxes = handler.split_time(
-                    start_time=start_time,
-                    end_time=end_time,
-                    batch_time=batch_time
+                    start_time=start_time, end_time=now, batch_time=batch_time
                 )
 
-                time_boxes.pop()
                 report_data = []
-                for time_box in time_boxes:
-                        datetime_from, datetime_to = time_box
 
-                        time_from = handler.datetime2time(datetime_from)
-                        time_to = handler.datetime2time(datetime_to)               
-                        reid_batch_data = self.database.get_history_reid_data(
-                            time_from=time_from, time_to=time_to
-                        )
-                        tracking_batch_data = self.database.get_history_tracking_data(
-                            time_from=time_from, time_to=time_to
-                        )
+                for datetime_from, datetime_to in time_boxes:
+                    time_from = handler.datetime2time(datetime_from)
+                    time_to = handler.datetime2time(datetime_to)
 
-                        logger.info(
-                            "Count: {} reid data from: {} to: {}".format(
-                                len(reid_batch_data), datetime_from, datetime_to
-                            )
-                        )
-                        
-                        if not len(reid_batch_data):
-                            # continue
-                            
-                            doc = {
-                                'start_time': datetime_from,
-                                'end_time': datetime_to,
-                                'camera_counts': {},
-                                'reid_counts': {},
-                                'count': 0
-                            }
+                    reid_batch_data = self.database.get_history_reid_data(
+                        time_from=time_from, time_to=time_to
+                    )
 
-                            logger.info(
-                            "Report from: {} to: {}: {}".format(
-                                datetime_from, datetime_to, doc
-                                )
-                            )
-                            report_data.append(doc)
-                            continue
+                    tracking_batch_data = self.database.get_history_tracking_data(
+                        time_from=time_from, time_to=time_to
+                    )
 
-                        reid_df = pd.DataFrame(reid_batch_data)
-                        tracking_df = pd.DataFrame(tracking_batch_data)
+                    logger.info(
+                        f"Count: {len(reid_batch_data)} reid data "
+                        f"from: {datetime_from} to: {datetime_to}"
+                    )
 
-                        camera_counts = {}
-                        for cam_id, cam_df in tracking_df.groupby('camera_id'):
-                            camera_counts[cam_id] = len(cam_df['object_id'].unique())
-
-                        reid_counts = {}
-                        for cam_id, cam_df in reid_df.groupby('query_cam'):
-                            reid_counts[cam_id] = len(cam_df['global_id'].unique())
-
-                        num_ids = len(reid_df['global_id'].unique())
+                    if not reid_batch_data:
                         doc = {
-                            'start_time': datetime_from,
-                            'end_time': datetime_to,
-                            'camera_counts': camera_counts,
-                            'reid_counts': reid_counts,
-                            'count': num_ids
+                            "start_time": datetime_from,
+                            "end_time": datetime_to,
+                            "camera_counts": {},
+                            "reid_counts": {},
+                            "count": 0,
                         }
-                        logger.info(
-                            "Report from: {} to: {}: {}".format(
-                                datetime_from, datetime_to, doc
-                            )
-                        )
                         report_data.append(doc)
+                        continue
 
-                if len(report_data):
-                    self.database.write_report_data(data=report_data)
+                    reid_df = pd.DataFrame(reid_batch_data)
+                    tracking_df = pd.DataFrame(tracking_batch_data)
 
-                time.sleep(idle_time)
+                    camera_counts = {
+                        cam: len(df["object_id"].unique())
+                        for cam, df in tracking_df.groupby("camera_id")
+                    }
+
+                    reid_counts = {
+                        cam: len(df["global_id"].unique())
+                        for cam, df in reid_df.groupby("query_cam")
+                    }
+
+                    num_ids = reid_df["global_id"].nunique()
+
+                    doc = {
+                        "start_time": datetime_from,
+                        "end_time": datetime_to,
+                        "camera_counts": camera_counts,
+                        "reid_counts": reid_counts,
+                        "count": num_ids,
+                    }
+
+                    logger.info(
+                        f"Report from: {datetime_from} to: {datetime_to}: {doc}"
+                    )
+
+                    report_data.append(doc)
+
+                # =========================
+                # 6. Write report
+                # =========================
+                if report_data:
+                    self.database.write_report_data(report_data)
+
+            except Exception as e:
+                logger.exception(f"Report error: {e}")
+
+            time.sleep(idle_time)

@@ -2,7 +2,12 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from nnet.backbones import build_model, get_model_name, load_pretrained_weights, get_nr_classes
+from nnet.backbones import (
+    build_model,
+    get_model_name,
+    load_pretrained_weights,
+    get_nr_classes,
+)
 from utility.processing import L2_norm, img_norm, resize_with_pad
 import cv2
 import os
@@ -10,9 +15,7 @@ import os
 
 class ReIDMultiBackend(nn.Module):
     # ReID models MultiBackend class for python inference on various backends
-    def __init__(
-        self, weights: str, device='cpu', fp16=False
-    ):
+    def __init__(self, weights: str, device="cpu", fp16=False):
         super().__init__()
         self.device = torch.device(device)
         self.fp16 = fp16
@@ -29,15 +32,16 @@ class ReIDMultiBackend(nn.Module):
         self.model_type = None
 
         # Load weights
-        if weights.endswith('.pt') or weights.endswith('.pth'):
+        if weights.endswith(".pt") or weights.endswith(".pth"):
             self.model_type = "torch"
             self.model = load_pretrained_weights(self.model, weights)
             self.model.to(device).eval()  # set eval mode
             self.model.half() if self.fp16 else self.model.float()
-        elif weights.endswith('.onnx'):  # ONNX Runtime
+        elif weights.endswith(".onnx"):  # ONNX Runtime
             self.model_type = "onnx"
             cuda = torch.cuda.is_available() and device.type != "cpu"
             import onnxruntime
+
             providers = (
                 ["CUDAExecutionProvider", "CPUExecutionProvider"]
                 if cuda
@@ -51,7 +55,7 @@ class ReIDMultiBackend(nn.Module):
         crops = []
         # dets are of different sizes so batch preprocessing is not possible
         for box in xyxys:
-            x1, y1, x2, y2 = box.astype('int')
+            x1, y1, x2, y2 = box.astype("int")
             crop = img[y1:y2, x1:x2]
             crop = resize_with_pad(crop, new_shape=input_size)
             crop = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
@@ -62,7 +66,9 @@ class ReIDMultiBackend(nn.Module):
 
         crops = torch.stack(crops, dim=0)
         crops = torch.permute(crops, (0, 3, 1, 2))
-        crops = crops.to(dtype=torch.half if self.fp16 else torch.float, device=self.device)
+        crops = crops.to(
+            dtype=torch.half if self.fp16 else torch.float, device=self.device
+        )
 
         return crops
 
@@ -82,11 +88,15 @@ class ReIDMultiBackend(nn.Module):
                 {self.session.get_inputs()[0].name: im_batch},
             )[0]
         else:
-            raise ValueError("Framework not supported at the moment, leave an enhancement suggestion")
+            raise ValueError(
+                "Framework not supported at the moment, leave an enhancement suggestion"
+            )
 
         if isinstance(features, (list, tuple)):
             return (
-                self.to_numpy(features[0]) if len(features) == 1 else [self.to_numpy(x) for x in features]
+                self.to_numpy(features[0])
+                if len(features) == 1
+                else [self.to_numpy(x) for x in features]
             )
         else:
             return self.to_numpy(features)
@@ -101,7 +111,7 @@ class ReIDMultiBackend(nn.Module):
             features = self.forward(crops)
         else:
             features = np.array([])
-        
+
         # Normalize vector
         features = L2_norm(features)
         return features

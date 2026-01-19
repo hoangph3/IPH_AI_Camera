@@ -7,7 +7,13 @@ import numpy as np
 
 from collections import defaultdict
 from core.reid import ReIDMultiBackend
-from core.intersection import box_line_intersection, halve_bbox_y, get_centroid, calculate_distance, calculate_perpendicular_point
+from core.intersection import (
+    box_line_intersection,
+    halve_bbox_y,
+    get_centroid,
+    calculate_distance,
+    calculate_perpendicular_point,
+)
 from datalayer.mongo import MongoBackend
 from utility import processing, handler, dataio
 from utility.hparams import HParams
@@ -17,16 +23,18 @@ from core.detection import Detection
 class Tracker(Detection):
     def build_trackers(self):
         trackers = {}
-        keys = self.redis_client.keys('*')
+        keys = self.redis_client.keys("*")
         for key in keys:
-            key = key.decode('utf-8')
+            key = key.decode("utf-8")
             trackers[key] = create_tracker(
                 tracker_type=self.config.model.track.track_type,
                 tracker_config=self.config.model.track.track_config,
                 reid_weights=self.config.model.reid.checkpoint,
-                device=torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'),
+                device=torch.device("cuda")
+                if torch.cuda.is_available()
+                else torch.device("cpu"),
                 half=False,
-                per_class=True
+                per_class=True,
             )
         return trackers
 
@@ -40,10 +48,10 @@ class Tracker(Detection):
         while True:
             track_events = []  # track_events need to be inserted to mongo
             try:
-                keys = self.redis_client.keys('*')
+                keys = self.redis_client.keys("*")
                 for key in keys:
                     # Get key name & data
-                    key = key.decode('utf-8')
+                    key = key.decode("utf-8")
 
                     # Build new tracker
                     if key not in self.trackers:
@@ -52,9 +60,11 @@ class Tracker(Detection):
                             tracker_type=self.config.model.track.track_type,
                             tracker_config=self.config.model.track.track_config,
                             reid_weights=self.config.model.reid.checkpoint,
-                            device=torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu'),
+                            device=torch.device("cuda")
+                            if torch.cuda.is_available()
+                            else torch.device("cpu"),
                             half=False,
-                            per_class=True
+                            per_class=True,
                         )
                     if key not in excluded_ids:
                         excluded_ids[key] = []
@@ -66,14 +76,17 @@ class Tracker(Detection):
                         continue
 
                     frame_info = pickle.loads(data)
-                    img = frame_info.get('frame_data')
-                    timestamp = frame_info.get('frame_time')
+                    img = frame_info.get("frame_data")
+                    timestamp = frame_info.get("frame_time")
                     if img is None:
                         continue
 
                     # Object detect
                     det_preds = self.det_model.predict(
-                        source=img, classes=self.det_classes, verbose=True, conf=self.det_conf
+                        source=img,
+                        classes=self.det_classes,
+                        verbose=True,
+                        conf=self.det_conf,
                     )
 
                     # Compute fps
@@ -95,52 +108,60 @@ class Tracker(Detection):
                         xyxys=bounding_boxes, img=img, input_size=self.reid_input_size
                     )
 
-                    for xyxy, conf, feature, object_id in zip(bounding_boxes, scores, features, object_ids):
+                    for xyxy, conf, feature, object_id in zip(
+                        bounding_boxes, scores, features, object_ids
+                    ):
                         xyxy = xyxy.tolist()
                         x1, y1, x2, y2 = xyxy
                         object_id = int(object_id)
                         conf = round(float(conf), 4)
                         box_img = img[y1:y2, x1:x2]
                         height_img = img.shape[0]
-                        upper, lower = halve_bbox_y(xyxy) 
+                        upper, lower = halve_bbox_y(xyxy)
 
                         # Filter box & camera zone
-                        if (y2 > 2/3 * height_img) or (key not in camera_zone):
-                            logger.info("Not valid box, cause y2: {}, max_y2: {}, cam: {}".format(
-                                y2, 2/3*height_img, key
-                            ))
+                        if (y2 > 2 / 3 * height_img) or (key not in camera_zone):
+                            logger.info(
+                                "Not valid box, cause y2: {}, max_y2: {}, cam: {}".format(
+                                    y2, 2 / 3 * height_img, key
+                                )
+                            )
                             excluded_ids[key].append(object_id)
                             continue
                         if object_id in excluded_ids[key]:
                             continue
-                        line_intersect = camera_zone[key]['line_intersect']
-                        box_time = camera_zone[key]['box_time']
+                        line_intersect = camera_zone[key]["line_intersect"]
+                        box_time = camera_zone[key]["box_time"]
 
-                        bool_intersect_lower = box_line_intersection(lower, line_intersect)
-                        bool_intersect_upper = box_line_intersection(upper, line_intersect)
+                        bool_intersect_lower = box_line_intersection(
+                            lower, line_intersect
+                        )
+                        bool_intersect_upper = box_line_intersection(
+                            upper, line_intersect
+                        )
 
                         if bool_intersect_lower and bool_intersect_upper == False:
-                            waypath = 'Up'
+                            waypath = "Up"
                         elif bool_intersect_upper and bool_intersect_lower == False:
                             waypath = "Down"
                         else:
-                            waypath = ''
+                            waypath = ""
 
                         if waypath != "Down":
                             continue
 
                         event = {
-                            'camera_id': key,
-                            'object_bbox': xyxy,
-                            'confidence': conf,
-                            'waypath': waypath,
-                            'object_id': object_id,
-                            'timestamp': timestamp,
-                            'feature_embeddings': feature.tolist(),
-                            'box_time': box_time,
-                            'object_image': dataio.convert_numpy_array_to_bytes(
-                                box_img
-                            ) if self.config.model.track.save_crop else ''
+                            "camera_id": key,
+                            "object_bbox": xyxy,
+                            "confidence": conf,
+                            "waypath": waypath,
+                            "object_id": object_id,
+                            "timestamp": timestamp,
+                            "feature_embeddings": feature.tolist(),
+                            "box_time": box_time,
+                            "object_image": dataio.convert_numpy_array_to_bytes(box_img)
+                            if self.config.model.track.save_crop
+                            else ""
                             # 'line_intersect': line_intersect,
                         }
 
@@ -148,22 +169,30 @@ class Tracker(Detection):
                             continue
 
                         object_ids_per_tracker[key][object_id] = True
-                        if key == 'Cam5' or key == 'Cam8':
+                        if key == "Cam5" or key == "Cam8":
                             bbox_centroid = get_centroid(xyxy)
-                            perpendicular_point = calculate_perpendicular_point(bbox_centroid, line_intersect)
-                            distance_to_perpendicular = calculate_distance(bbox_centroid, perpendicular_point)
+                            perpendicular_point = calculate_perpendicular_point(
+                                bbox_centroid, line_intersect
+                            )
+                            distance_to_perpendicular = calculate_distance(
+                                bbox_centroid, perpendicular_point
+                            )
                             _, y1, _, y2 = xyxy
-                            bbox_height = y2-y1
-                            bbox_height_percentage = distance_to_perpendicular / bbox_height
+                            bbox_height = y2 - y1
+                            bbox_height_percentage = (
+                                distance_to_perpendicular / bbox_height
+                            )
                             if bbox_height_percentage <= 0.25:
-                                #toggle = 0
+                                # toggle = 0
                                 continue
                         track_events.append(event)
 
                 if len(track_events):
                     logger.info("Track: {} events".format(len(track_events)))
                     self.mongo_client.create(
-                        db_name=self.mongo_database, collection_name=self.mongo_collection, data=track_events
+                        db_name=self.mongo_database,
+                        collection_name=self.mongo_collection,
+                        data=track_events,
                     )
 
             except Exception as e:

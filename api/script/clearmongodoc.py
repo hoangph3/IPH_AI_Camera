@@ -1,7 +1,9 @@
 import pymongo
 
 # Connect to MongoDB
-client = pymongo.MongoClient("mongodb://root:password@localhost:27017/?authSource=admin")  # Replace with your actual MongoDB connection URI
+client = pymongo.MongoClient(
+    "mongodb://root:password@localhost:27017/?authSource=admin"
+)  # Replace with your actual MongoDB connection URI
 database_name = "api_test"
 collection_name = "cam_list"
 collection = client[database_name][collection_name]

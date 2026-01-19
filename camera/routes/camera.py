@@ -9,9 +9,7 @@ from utility.capture import read_frame_with_count
 
 
 camera = APIRouter(
-    prefix="/api",
-    tags=["camera"],
-    responses={404: {"description": "Not found"}},
+    prefix="/api", tags=["camera"], responses={404: {"description": "Not found"}}
 )
 capture = PController.get_instance()
 

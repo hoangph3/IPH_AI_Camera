@@ -37,7 +37,7 @@ class MongoBackend(GenericBackend):
             result = collection.insert_many(data)
             return list(map(str, result.inserted_ids))
 
-        _id = data.get('_id')
+        _id = data.get("_id")
         if self.get(db_name, collection_name, _ids=_id):
             raise ObjectIdExists(collection_name, _id)
 
@@ -46,11 +46,8 @@ class MongoBackend(GenericBackend):
 
     def update(self, db_name, collection_name, data):
         collection = self.get_collection(db_name, collection_name)
-        collection.update_one({
-            "_id": data["_id"],
-            "$set": data
-        })
-        return str(data['_id'])
+        collection.update_one({"_id": data["_id"], "$set": data})
+        return str(data["_id"])
 
     def delete(self, db_name, collection_name, data):
         collection = self.get_collection(db_name, collection_name)

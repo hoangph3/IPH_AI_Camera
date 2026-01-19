@@ -14,6 +14,4 @@ if __name__ == "__main__":
         worker = Detection(config=config)
 
     camera_config = get_hparams_from_file("./env/camera.json", as_dict=True)
-    worker.run(
-        camera_zone=camera_config["zone"]
-    )
+    worker.run(camera_zone=camera_config["zone"])

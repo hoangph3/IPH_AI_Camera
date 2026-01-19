@@ -35,8 +35,10 @@ CAMERA_IP_MAPPING = {
     "Cam21": "10.0.0.221",
     "Cam22": "192.168.0.149",
     "Cam23": "192.168.0.168",
-    "Cam23": "192.168.0.251"
+    "Cam23": "192.168.0.251",
 }
+
+
 def read_frame_with_count(source):
     hps = get_hparams_from_file(config_path=config_path)
 
@@ -47,7 +49,7 @@ def read_frame_with_count(source):
     ip_address = extract_ip_from_rtsp(source)
     is_stream = is_stream_source(source)
 
-     # Get the camera ID based on the IP address
+    # Get the camera ID based on the IP address
     camera_id = get_camera_id_from_ip(ip_address)
     if Path(source).is_file():
         key = Path(source).resolve().stem
@@ -61,9 +63,11 @@ def read_frame_with_count(source):
     w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS) % 100
-    logger.info("Load source: {}, resolution: {}, fps: {}, stream: {}".format(
-        source, (w, h), fps, is_stream
-    ))
+    logger.info(
+        "Load source: {}, resolution: {}, fps: {}, stream: {}".format(
+            source, (w, h), fps, is_stream
+        )
+    )
 
     n = 0
     while True:
@@ -76,7 +80,11 @@ def read_frame_with_count(source):
                 logger.info("Not retry offline source: {}".format(source))
             else:
                 # retry stream only
-                logger.info("Retry streaming source: {} in {} seconds".format(source, hps.redis.time_retry))
+                logger.info(
+                    "Retry streaming source: {} in {} seconds".format(
+                        source, hps.redis.time_retry
+                    )
+                )
                 cap = cv2.VideoCapture(source)
                 ret, frame = cap.read()
 
@@ -90,7 +98,7 @@ def read_frame_with_count(source):
         while True:
             if redis_client.llen(key) < max_size:
                 # Add frame count to the frame
-                frame_with_count = {'frame_count': get_time(), 'frame_data': frame}
+                frame_with_count = {"frame_count": get_time(), "frame_data": frame}
                 redis_client.rpush(key, pickle.dumps(frame_with_count))
                 break
 
@@ -100,7 +108,7 @@ def read_frame_with_count(source):
 
 def extract_ip_from_rtsp(rtsp_url):
     # Define a regular expression pattern to match an IP address in the input string
-    ip_pattern = r'(\d+\.\d+\.\d+\.\d+)'
+    ip_pattern = r"(\d+\.\d+\.\d+\.\d+)"
 
     # Use re.search to find the first IP address in the input string
     match = re.search(ip_pattern, rtsp_url)
@@ -116,13 +124,14 @@ def extract_ip_from_rtsp(rtsp_url):
 
 
 def is_stream_source(source):
-    if ('rtsp://' in source) or ('tcp://' in source):
+    if ("rtsp://" in source) or ("tcp://" in source):
         return True
 
-    if ('http://' in source) or ('https://' in source):
+    if ("http://" in source) or ("https://" in source):
         return True
 
     return False
+
 
 def get_camera_id_from_ip(ip_address):
     # Reverse lookup to find the camera ID based on the IP address

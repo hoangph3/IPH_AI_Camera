@@ -42,13 +42,15 @@ def convert_img_to_bytes(img_path):
     return convert_numpy_array_to_bytes(array)
 
 
-def convert_bytes_to_numpy_array(j_dumps: str, resize=False, image_width=None) -> np.array:
+def convert_bytes_to_numpy_array(
+    j_dumps: str, resize=False, image_width=None
+) -> np.array:
     # TODO: load json string to numpy array
     compressed_data = base64.b64decode(j_dumps)
     img = Image.open(io.BytesIO(compressed_data))
 
     # convert PNG -> JPEG
-    img_path = tempfile.NamedTemporaryFile(suffix='.jpg').name
+    img_path = tempfile.NamedTemporaryFile(suffix=".jpg").name
     img.convert("RGB").save(img_path, "JPEG")
     img = Image.open(img_path)
 

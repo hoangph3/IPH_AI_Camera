@@ -4,9 +4,9 @@ import numpy as np
 import torch
 
 
-def resize_with_pad(image: np.array, 
-                    new_shape: Tuple[int, int], 
-                    padding_color: Tuple[int] = (0, 0, 0)) -> np.array:
+def resize_with_pad(
+    image: np.array, new_shape: Tuple[int, int], padding_color: Tuple[int] = (0, 0, 0)
+) -> np.array:
     """Maintains aspect ratio and resizes with padding.
     Params:
         image: Image to be resized.
@@ -16,8 +16,8 @@ def resize_with_pad(image: np.array,
         image: Resized image with padding
     """
     original_shape = (image.shape[1], image.shape[0])
-    ratio = float(max(new_shape))/max(original_shape)
-    new_size = tuple([int(x*ratio) for x in original_shape])
+    ratio = float(max(new_shape)) / max(original_shape)
+    new_size = tuple([int(x * ratio) for x in original_shape])
 
     if new_size[0] > new_shape[0] or new_size[1] > new_shape[1]:
         ratio = float(min(new_shape)) / min(original_shape)
@@ -26,10 +26,12 @@ def resize_with_pad(image: np.array,
     image = cv2.resize(image, new_size)
     delta_w = new_shape[0] - new_size[0] if new_shape[0] > new_size[0] else 0
     delta_h = new_shape[1] - new_size[1] if new_shape[1] > new_size[1] else 0
-    top, bottom = delta_h//2, delta_h-(delta_h//2)
-    left, right = delta_w//2, delta_w-(delta_w//2)
+    top, bottom = delta_h // 2, delta_h - (delta_h // 2)
+    left, right = delta_w // 2, delta_w - (delta_w // 2)
 
-    image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT,None,value=padding_color)
+    image = cv2.copyMakeBorder(
+        image, top, bottom, left, right, cv2.BORDER_CONSTANT, None, value=padding_color
+    )
     if image.shape[0] != new_shape[0] or image.shape[1] != new_shape[1]:
         # Force resize
         image = cv2.resize(image, new_shape, interpolation=cv2.INTER_LINEAR)
@@ -46,7 +48,7 @@ def reshape_img(x):
 
 
 def img_norm(x):
-    x = (np.array(x) / 255.).astype(np.float32)
+    x = (np.array(x) / 255.0).astype(np.float32)
     return x
 
 
@@ -119,8 +121,8 @@ def non_max_suppression(boxes, max_bbox_overlap, scores=None):
         overlap = (w * h) / area[idxs[:last]]
 
         idxs = np.delete(
-            idxs, np.concatenate(
-                ([last], np.where(overlap > max_bbox_overlap)[0])))
+            idxs, np.concatenate(([last], np.where(overlap > max_bbox_overlap)[0]))
+        )
 
     return pick
 
@@ -148,15 +150,21 @@ def delete_overlap_box(boxes, max_bbox_overlap, scores=None):
         # i = idxs[last]
         # pick.append(i)
 
-        xx1 = np.maximum(x1[idxs[i]], x1[idxs[i + 1:]])
-        yy1 = np.maximum(y1[idxs[i]], y1[idxs[i + 1:]])
-        xx2 = np.minimum(x2[idxs[i]], x2[idxs[i + 1:]])
-        yy2 = np.minimum(y2[idxs[i]], y2[idxs[i + 1:]])
+        xx1 = np.maximum(x1[idxs[i]], x1[idxs[i + 1 :]])
+        yy1 = np.maximum(y1[idxs[i]], y1[idxs[i + 1 :]])
+        xx2 = np.minimum(x2[idxs[i]], x2[idxs[i + 1 :]])
+        yy2 = np.minimum(y2[idxs[i]], y2[idxs[i + 1 :]])
 
         w = np.maximum(0, xx2 - xx1 + 1)
         h = np.maximum(0, yy2 - yy1 + 1)
 
-        overlap = (w * h) / area[idxs[i + 1:]]
+        overlap = (w * h) / area[idxs[i + 1 :]]
         if len(np.where(overlap > max_bbox_overlap)[0]) > 0:
-            deleted += list(idxs[np.concatenate(([i], np.where(overlap > max_bbox_overlap)[0] + i + 1))])
+            deleted += list(
+                idxs[
+                    np.concatenate(
+                        ([i], np.where(overlap > max_bbox_overlap)[0] + i + 1)
+                    )
+                ]
+            )
     return list(set(idxs) - set(deleted))
