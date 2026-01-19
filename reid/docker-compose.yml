@@ -1,6 +1,6 @@
 services:
   mct-reid:
-    image: kotoracompany/mct-reid:0.1.2
+    image: kotoracompany/mct-reid:0.1.4
     container_name: mct_reid
     volumes:
       - ./env:/app/env
@@ -11,7 +11,7 @@ services:
       - TZ=Asia/Ho_Chi_Minh
 
   mct-cron-report:
-    image: kotoracompany/mct-reid:0.1.2
+    image: kotoracompany/mct-reid:0.1.4
     container_name: mct_cron_report
     volumes:
       - ./env:/app/env
@@ -23,7 +23,7 @@ services:
     command: ["python3", "auto_stats.py"]
 
   mct-cron-log:
-    image: kotoracompany/mct-reid:0.1.2
+    image: kotoracompany/mct-reid:0.1.4
     container_name: mct_cron_log
     volumes:
       - ./env:/app/env

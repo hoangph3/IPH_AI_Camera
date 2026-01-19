@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 IMAGE ?= kotoracompany/mct-reid
-VERSION ?= 0.1.3
+VERSION ?= 0.1.4
 
 echo:
 	@echo $(IMAGE):$(VERSION)
